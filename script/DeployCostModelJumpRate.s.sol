@@ -7,7 +7,7 @@ import "src/CostModelJumprate.sol";
 /**
   * @notice *Purpose: Local deploy, testing, and production.*
   *
-  * This script deploys a CostModelJumpRate.
+  * This script deploys a CostModelJumpRate contract.
   * Before executing, the configuration section in the script should be updated.
   *
   * To run this script:
