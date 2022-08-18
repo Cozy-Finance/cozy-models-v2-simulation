@@ -5,7 +5,7 @@ import "forge-std/Script.sol";
 import "src/DecayModelConstant.sol";
 
 /**
-  * @notice *Purpose: Local deploy, testing, and production.*
+  * @notice Purpose: Local deploy, testing, and production.
   *
   * This script deploys a DecayModelConstant contract.
   * Before executing, the configuration section in the script should be updated.

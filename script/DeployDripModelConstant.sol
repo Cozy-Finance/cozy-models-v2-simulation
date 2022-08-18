@@ -5,7 +5,7 @@ import "forge-std/Script.sol";
 import "src/DripModelConstant.sol";
 
 /**
-  * @notice *Purpose: Local deploy, testing, and production.*
+  * @notice Purpose: Local deploy, testing, and production.
   *
   * This script deploys a DripModelConstant contract.
   * Before executing, the configuration section in the script should be updated.

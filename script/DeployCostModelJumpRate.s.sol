@@ -5,7 +5,7 @@ import "forge-std/Script.sol";
 import "src/CostModelJumprate.sol";
 
 /**
-  * @notice *Purpose: Local deploy, testing, and production.*
+  * @notice Purpose: Local deploy, testing, and production.
   *
   * This script deploys a CostModelJumpRate contract.
   * Before executing, the configuration section in the script should be updated.
