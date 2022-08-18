@@ -16,7 +16,7 @@ import "src/DecayModelConstant.sol";
   * # Start anvil, forking from the current state of the desired chain.
   * anvil --fork-url $OPTIMISM_RPC_URL
   *
-  * # In a separate terminal, perform a dry run the script.
+  * # In a separate terminal, perform a dry run of the script.
   * forge script script/DeployDecayModelConstant.s.sol \
   *   --rpc-url "http://127.0.0.1:8545" \
   *   -vvvv
