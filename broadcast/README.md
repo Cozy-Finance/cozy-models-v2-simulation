@@ -21,7 +21,4 @@ DripModelConstantFactory deployed 0x1D369C7bD2C6389fdF1d55F9b8C24d610b811856
   - Parsed timestamp: 2022-09-07T15:04:07.000Z
   - Commit: baa1ce2aab4b9910c0986eabae07387b1d3bfa3c
 </details>
-<details>
-  <summary>Configuration</summary>
-</details>
 <br />
