@@ -29,7 +29,7 @@ DripModelConstantFactory deployed 0x1D369C7bD2C6389fdF1d55F9b8C24d610b811856
 
 #### Deploy 1
 
-CostModelJumpRateFactory deployed 0x7e5a2bDC10F05D6cF15563570Eae3B8d346B9991
+CostModelJumpRate deployed 0x7e5a2bDC10F05D6cF15563570Eae3B8d346B9991
 
 <details>
   <summary>Metadata</summary>
