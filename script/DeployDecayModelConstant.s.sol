@@ -2,7 +2,7 @@
 pragma solidity ^0.8.13;
 
 import "forge-std/Script.sol";
-import "src/DecayModelConstant.sol";
+import "src/DecayModelConstantFactory.sol";
 
 /**
   * @notice Purpose: Local deploy, testing, and production.
@@ -45,16 +45,32 @@ contract DeployDecayModelConstant is Script {
   // Multiplying r by -1e18 to calculate the scaled up per-second value required by decay model constructors ~= 9116094774
   uint256 decayRatePerSecond = 9116094774;
 
+  DecayModelConstantFactory factory = DecayModelConstantFactory(0xF049CE89083C67A30eD6172E94F9fBd8FE76483E);
+
   // ---------------------------
   // -------- Execution --------
   // ---------------------------
 
   function run() public {
     console2.log("Deploying DecayModelConstant...");
+    console2.log("    factory", address(factory));
     console2.log("    decayRatePerSecond", decayRatePerSecond);
 
-    vm.broadcast();
-    DecayModelConstant decayModel = new DecayModelConstant(decayRatePerSecond);
-    console2.log("DecayModelConstant deployed", address(decayModel));
+    address _availableModel = factory.getModel(decayRatePerSecond);
+
+    if (_availableModel == address(0)) {
+      vm.broadcast();
+      _availableModel = address(factory.deployModel(decayRatePerSecond));
+      console2.log("New DecayModelConstant deployed");
+    } else {
+      // A DecayModelConstant exactly like the one you wanted already exists!
+      // Since models can be re-used, there's no need to deploy a new one.
+      console2.log("Found existing DecayModelConstant with specified configs.");
+    }
+
+    console2.log(
+      "Your DecayModelConstant is available at this address:",
+      _availableModel
+    );
   }
 }

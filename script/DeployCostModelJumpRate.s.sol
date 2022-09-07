@@ -2,7 +2,7 @@
 pragma solidity ^0.8.13;
 
 import "forge-std/Script.sol";
-import "src/CostModelJumprate.sol";
+import "src/CostModelJumpRateFactory.sol";
 
 /**
   * @notice Purpose: Local deploy, testing, and production.
@@ -41,26 +41,48 @@ contract DeployCostModelJumpRate is Script {
   uint256 costFactorAtFullUtilization = 0.5e18; // 50% fee at full utilization
   uint256 cancellationPenalty = 0.1e18;  // charge a 10% penalty to cancel
 
+  CostModelJumpRateFactory factory = CostModelJumpRateFactory(0xF6660966f9A20259396d1A1674fC2DD1773a1C73);
+
   // ---------------------------
   // -------- Execution --------
   // ---------------------------
 
   function run() public {
     console2.log("Deploying CostModelJumpRate...");
+    console2.log("    factory", address(factory));
     console2.log("    kink", kink);
     console2.log("    costFactorAtZeroUtilization", costFactorAtZeroUtilization);
     console2.log("    costFactorAtKinkUtilization", costFactorAtKinkUtilization);
     console2.log("    costFactorAtFullUtilization", costFactorAtFullUtilization);
     console2.log("    cancellationPenalty", cancellationPenalty);
 
-    vm.broadcast();
-    CostModelJumpRate costModelJumpRate = new CostModelJumpRate(
+    address _availableModel = factory.getModel(
       kink,
       costFactorAtZeroUtilization,
       costFactorAtKinkUtilization,
       costFactorAtFullUtilization,
       cancellationPenalty
     );
-    console2.log("CostModelJumpRate deployed", address(costModelJumpRate));
+
+    if (_availableModel == address(0)) {
+      vm.broadcast();
+      _availableModel = address(factory.deployModel(
+        kink,
+        costFactorAtZeroUtilization,
+        costFactorAtKinkUtilization,
+        costFactorAtFullUtilization,
+        cancellationPenalty
+      ));
+      console2.log("New CostModelJumpRate deployed");
+    } else {
+      // A CostModelJumpRate exactly like the one you wanted already exists!
+      // Since models can be re-used, there's no need to deploy a new one.
+      console2.log("Found existing CostModelJumpRate with specified configs.");
+    }
+
+    console2.log(
+      "Your CostModelJumpRate is available at this address:",
+      _availableModel
+    );
   }
 }

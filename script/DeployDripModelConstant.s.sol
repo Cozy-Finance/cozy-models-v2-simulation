@@ -2,7 +2,7 @@
 pragma solidity ^0.8.13;
 
 import "forge-std/Script.sol";
-import "src/DripModelConstant.sol";
+import "src/DripModelConstantFactory.sol";
 
 /**
   * @notice Purpose: Local deploy, testing, and production.
@@ -45,16 +45,32 @@ contract DeployDripModelConstant is Script {
   // Multiplying r by -1e18 to calculate the scaled up per-second value required by drip model constructors ~= 9116094774
   uint256 dripRatePerSecond = 9116094774;
 
+  DripModelConstantFactory factory = DripModelConstantFactory(0x1D369C7bD2C6389fdF1d55F9b8C24d610b811856);
+
   // ---------------------------
   // -------- Execution --------
   // ---------------------------
 
   function run() public {
     console2.log("Deploying DripModelConstant...");
+    console2.log("    factory", address(factory));
     console2.log("    dripRatePerSecond", dripRatePerSecond);
 
-    vm.broadcast();
-    DripModelConstant dripModel = new DripModelConstant(dripRatePerSecond);
-    console2.log("DripModelConstant deployed", address(dripModel));
+    address _availableModel = factory.getModel(dripRatePerSecond);
+
+    if (_availableModel == address(0)) {
+      vm.broadcast();
+      _availableModel = address(factory.deployModel(dripRatePerSecond));
+      console2.log("New DripModelConstant deployed");
+    } else {
+      // A DripModelConstant exactly like the one you wanted already exists!
+      // Since models can be re-used, there's no need to deploy a new one.
+      console2.log("Found existing DripModelConstant with specified configs.");
+    }
+
+    console2.log(
+      "Your DripModelConstant is available at this address:",
+      _availableModel
+    );
   }
 }
