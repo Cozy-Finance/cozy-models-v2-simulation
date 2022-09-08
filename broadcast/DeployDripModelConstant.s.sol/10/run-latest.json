@@ -2,7 +2,7 @@
   "transactions": [
     {
       "hash": "0x02aa996fc904a7aae543448c05752d43c45fd8f60808d239f7163e638d0afec3",
-      "transactionType": "CREATE",
+      "transactionType": "CALL",
       "contractName": null,
       "contractAddress": "0x1d369c7bd2c6389fdf1d55f9b8c24d610b811856",
       "function": null,
