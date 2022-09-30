@@ -8,7 +8,8 @@ import "src/DripModelConstantFactory.sol";
   * @notice Purpose: Local deploy, testing, and production.
   *
   * This script deploys a DripModelConstant contract.
-  * Before executing, the configuration section in the script should be updated.
+  * Before executing, the input json file `script/input/<chain-id>/deploy-drip-model-constant-<test or production>.json`
+  * should be reviewed.
   *
   * To run this script:
   *

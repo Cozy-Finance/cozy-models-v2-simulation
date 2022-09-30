@@ -8,7 +8,8 @@ import "src/CostModelJumpRateFactory.sol";
   * @notice Purpose: Local deploy, testing, and production.
   *
   * This script deploys a CostModelJumpRate contract.
-  * Before executing, the configuration section in the script should be updated.
+  * Before executing, the input json file `script/input/<chain-id>/deploy-cost-model-jump-rate-<test or production>.json`
+  * should be reviewed.
   *
   * To run this script:
   *
