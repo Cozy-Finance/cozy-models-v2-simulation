@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
+pragma solidity 0.8.15;
 
-import "forge-std/Script.sol";
+import "script/ScriptUtils.sol";
 import "src/DecayModelConstantFactory.sol";
 
 /**
@@ -18,22 +18,25 @@ import "src/DecayModelConstantFactory.sol";
   *
   * # In a separate terminal, perform a dry run of the script.
   * forge script script/DeployDecayModelConstant.s.sol \
+  *   --sig "run(string)" "deploy-decay-model-constant-<test or production>"
   *   --rpc-url "http://127.0.0.1:8545" \
   *   -vvvv
   *
   * # Or, to broadcast a transaction.
   * forge script script/DeployDecayModelConstant.s.sol \
+  *   --sig "run(string)" "deploy-decay-model-constant-<test or production>"
   *   --rpc-url "http://127.0.0.1:8545" \
   *   --private-key $OWNER_PRIVATE_KEY \
   *   --broadcast \
   *   -vvvv
   * ```
  */
-contract DeployDecayModelConstant is Script {
+contract DeployDecayModelConstant is ScriptUtils {
+  using stdJson for string;
 
-  // -------------------------------
-  // -------- Configuration --------
-  // -------------------------------
+  // -----------------------------------
+  // -------- Configured Inputs --------
+  // -----------------------------------
 
   // For calculating the per-second decay rate, we use the exponential decay formula A = P * (1 - r) ^ t
   // where A is final amount, P is principal (starting) amount, r is the per-second decay rate, and t is the number of elapsed seconds.
@@ -43,15 +46,20 @@ contract DeployDecayModelConstant is Script {
   // -r = 0.75^(1/31557600) - 1
   // -r = -9.116094732822280932149636651070655494101566187385032e-9
   // Multiplying r by -1e18 to calculate the scaled up per-second value required by decay model constructors ~= 9116094774
-  uint256 decayRatePerSecond = 9116094774;
+  uint256 decayRatePerSecond;
 
-  DecayModelConstantFactory factory = DecayModelConstantFactory(0xF049CE89083C67A30eD6172E94F9fBd8FE76483E);
+  DecayModelConstantFactory factory;
 
   // ---------------------------
   // -------- Execution --------
   // ---------------------------
 
-  function run() public {
+  function run(string memory _fileName) public {
+    string memory _json = readInput(_fileName);
+
+    factory = DecayModelConstantFactory(_json.readAddress(".factory"));
+    decayRatePerSecond = _json.readUint(".decayRatePerSecond");
+
     console2.log("Deploying DecayModelConstant...");
     console2.log("    factory", address(factory));
     console2.log("    decayRatePerSecond", decayRatePerSecond);
