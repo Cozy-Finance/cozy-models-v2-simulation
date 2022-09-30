@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import "forge-std/Script.sol";
+import "script/ScriptUtils.sol";
 import "src/CostModelJumpRateFactory.sol";
 
 /**
@@ -18,60 +18,72 @@ import "src/CostModelJumpRateFactory.sol";
   *
   * # In a separate terminal, perform a dry run the script.
   * forge script script/DeployCostModelJumpRate.s.sol \
+  *   --sig "run(string)" "deploy-cost-model-jump-rate-<test or production>"
   *   --rpc-url "http://127.0.0.1:8545" \
   *   -vvvv
   *
   * # Or, to broadcast a transaction.
   * forge script script/DeployCostModelJumpRate.s.sol \
+  *   --sig "run(string)" "deploy-cost-model-jump-rate-<test or production>"
   *   --rpc-url "http://127.0.0.1:8545" \
   *   --private-key $OWNER_PRIVATE_KEY \
   *   --broadcast \
   *   -vvvv
   * ```
  */
-contract DeployCostModelJumpRate is Script {
+contract DeployCostModelJumpRate is ScriptUtils {
+  using stdJson for string;
 
-  // -------------------------------
-  // -------- Configuration --------
-  // -------------------------------
+  // -----------------------------------
+  // -------- Configured Inputs --------
+  // -----------------------------------
 
-  uint256 kink = 0.8e18; // kink at 80%
-  uint256 costFactorAtZeroUtilization = 0.0e18; // 0% fee at no utilization
-  uint256 costFactorAtKinkUtilization = 0.2e18; // 20% fee at kink utilization
-  uint256 costFactorAtFullUtilization = 0.5e18; // 50% fee at full utilization
-  uint256 cancellationPenalty = 0.1e18;  // charge a 10% penalty to cancel
+  // Note: The attributes in this struct must be in alphabetical order due to `parseJson` limitations.
+  struct CostModelMetadata {
+    uint256 cancellationPenalty; // Penalty to cancel
+    uint256 costFactorAtFullUtilization; // Fee at full utilization
+    uint256 costFactorAtKinkUtilization; // Fee at kink utilization
+    uint256 costFactorAtZeroUtilization; // Fee at no utilization
+    uint256 kink;
+  }
 
-  CostModelJumpRateFactory factory = CostModelJumpRateFactory(0xF6660966f9A20259396d1A1674fC2DD1773a1C73);
+  CostModelJumpRateFactory factory;
 
   // ---------------------------
   // -------- Execution --------
   // ---------------------------
 
-  function run() public {
+  function run(string memory _fileName) public {
+    string memory _json = readInput(_fileName);
+
+    factory = CostModelJumpRateFactory(_json.readAddress(".factory"));
+
+    CostModelMetadata memory _metadata = abi.decode(_json.parseRaw(".metadata"), (CostModelMetadata));
+
     console2.log("Deploying CostModelJumpRate...");
     console2.log("    factory", address(factory));
-    console2.log("    kink", kink);
-    console2.log("    costFactorAtZeroUtilization", costFactorAtZeroUtilization);
-    console2.log("    costFactorAtKinkUtilization", costFactorAtKinkUtilization);
-    console2.log("    costFactorAtFullUtilization", costFactorAtFullUtilization);
-    console2.log("    cancellationPenalty", cancellationPenalty);
+    console2.log("    kink", _metadata.kink);
+    console2.log("    costFactorAtZeroUtilization", _metadata.costFactorAtZeroUtilization);
+    console2.log("    costFactorAtKinkUtilization", _metadata.costFactorAtKinkUtilization);
+    console2.log("    costFactorAtFullUtilization", _metadata.costFactorAtFullUtilization);
+    console2.log("    cancellationPenalty", _metadata.cancellationPenalty);
 
     address _availableModel = factory.getModel(
-      kink,
-      costFactorAtZeroUtilization,
-      costFactorAtKinkUtilization,
-      costFactorAtFullUtilization,
-      cancellationPenalty
+      _metadata.kink,
+      _metadata.costFactorAtZeroUtilization,
+      _metadata.costFactorAtKinkUtilization,
+      _metadata.costFactorAtFullUtilization,
+      _metadata.cancellationPenalty
     );
 
     if (_availableModel == address(0)) {
       vm.broadcast();
       _availableModel = address(factory.deployModel(
-        kink,
-        costFactorAtZeroUtilization,
-        costFactorAtKinkUtilization,
-        costFactorAtFullUtilization,
-        cancellationPenalty
+        _metadata.kink,
+        _metadata.costFactorAtZeroUtilization,
+        _metadata.costFactorAtKinkUtilization,
+        _metadata.costFactorAtFullUtilization,
+        _metadata.cancellationPenalty
       ));
       console2.log("New CostModelJumpRate deployed");
     } else {

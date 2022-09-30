@@ -1,0 +1,10 @@
+{
+  "factory": "0xF6660966f9A20259396d1A1674fC2DD1773a1C73",
+  "metadata": {
+    "cancellationPenalty": 100000000000000000,
+    "costFactorAtFullUtilization": 500000000000000000,
+    "costFactorAtKinkUtilization": 200000000000000000,
+    "costFactorAtZeroUtilization": 0,
+    "kink": 800000000000000000
+  }
+}
