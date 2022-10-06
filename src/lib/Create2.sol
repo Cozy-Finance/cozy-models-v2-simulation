@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Unlicensed
-pragma solidity 0.8.15;
+pragma solidity 0.8.16;
 
 library Create2 {
   /// @notice Computes the address that would result from a CREATE2 call for a contract according
