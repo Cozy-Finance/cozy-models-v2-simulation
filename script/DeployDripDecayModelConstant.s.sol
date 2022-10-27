@@ -32,7 +32,7 @@ import "src/DripDecayModelConstantFactory.sol";
   *   -vvvv
   * ```
  */
-contract DeployDecayModelConstant is ScriptUtils {
+contract DeployDripDecayModelConstant is ScriptUtils {
   using stdJson for string;
 
   // -----------------------------------
@@ -47,7 +47,7 @@ contract DeployDecayModelConstant is ScriptUtils {
   // -r = 0.75^(1/31557600) - 1
   // -r = -9.116094732822280932149636651070655494101566187385032e-9
   // Multiplying r by -1e18 to calculate the scaled up per-second value required by decay model constructors ~= 9116094774
-  uint256 decayRatePerSecond;
+  uint256 dripDecayRatePerSecond;
 
   DripDecayModelConstantFactory factory;
 
@@ -59,17 +59,17 @@ contract DeployDecayModelConstant is ScriptUtils {
     string memory _json = readInput(_fileName);
 
     factory = DripDecayModelConstantFactory(_json.readAddress(".factory"));
-    decayRatePerSecond = _json.readUint(".decayRatePerSecond");
+    dripDecayRatePerSecond = _json.readUint(".dripDecayRatePerSecond");
 
     console2.log("Deploying DripDecayModelConstant...");
     console2.log("    factory", address(factory));
-    console2.log("    decayRatePerSecond", decayRatePerSecond);
+    console2.log("    decayRatePerSecond", dripDecayRatePerSecond);
 
-    address _availableModel = factory.getModel(decayRatePerSecond);
+    address _availableModel = factory.getModel(dripDecayRatePerSecond);
 
     if (_availableModel == address(0)) {
       vm.broadcast();
-      _availableModel = address(factory.deployModel(decayRatePerSecond));
+      _availableModel = address(factory.deployModel(dripDecayRatePerSecond));
       console2.log("New DripDecayModelConstant deployed");
     } else {
       // A DripDecayModelConstant exactly like the one you wanted already exists!
