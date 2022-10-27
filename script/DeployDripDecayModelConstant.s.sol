@@ -2,12 +2,12 @@
 pragma solidity 0.8.16;
 
 import "script/ScriptUtils.sol";
-import "src/DecayModelConstantFactory.sol";
+import "src/DripDecayModelConstantFactory.sol";
 
 /**
   * @notice Purpose: Local deploy, testing, and production.
   *
-  * This script deploys a DecayModelConstant contract.
+  * This script deploys a DripDecayModelConstant contract.
   * Before executing, the input json file `script/input/<chain-id>/deploy-decay-model-constant-<test or production>.json`
   * should be reviewed.
   *
@@ -32,7 +32,7 @@ import "src/DecayModelConstantFactory.sol";
   *   -vvvv
   * ```
  */
-contract DeployDecayModelConstant is ScriptUtils {
+contract DeployDripDecayModelConstant is ScriptUtils {
   using stdJson for string;
 
   // -----------------------------------
@@ -47,9 +47,9 @@ contract DeployDecayModelConstant is ScriptUtils {
   // -r = 0.75^(1/31557600) - 1
   // -r = -9.116094732822280932149636651070655494101566187385032e-9
   // Multiplying r by -1e18 to calculate the scaled up per-second value required by decay model constructors ~= 9116094774
-  uint256 decayRatePerSecond;
+  uint256 dripDecayRatePerSecond;
 
-  DecayModelConstantFactory factory;
+  DripDecayModelConstantFactory factory;
 
   // ---------------------------
   // -------- Execution --------
@@ -58,27 +58,27 @@ contract DeployDecayModelConstant is ScriptUtils {
   function run(string memory _fileName) public {
     string memory _json = readInput(_fileName);
 
-    factory = DecayModelConstantFactory(_json.readAddress(".factory"));
-    decayRatePerSecond = _json.readUint(".decayRatePerSecond");
+    factory = DripDecayModelConstantFactory(_json.readAddress(".factory"));
+    dripDecayRatePerSecond = _json.readUint(".dripDecayRatePerSecond");
 
-    console2.log("Deploying DecayModelConstant...");
+    console2.log("Deploying DripDecayModelConstant...");
     console2.log("    factory", address(factory));
-    console2.log("    decayRatePerSecond", decayRatePerSecond);
+    console2.log("    decayRatePerSecond", dripDecayRatePerSecond);
 
-    address _availableModel = factory.getModel(decayRatePerSecond);
+    address _availableModel = factory.getModel(dripDecayRatePerSecond);
 
     if (_availableModel == address(0)) {
       vm.broadcast();
-      _availableModel = address(factory.deployModel(decayRatePerSecond));
-      console2.log("New DecayModelConstant deployed");
+      _availableModel = address(factory.deployModel(dripDecayRatePerSecond));
+      console2.log("New DripDecayModelConstant deployed");
     } else {
-      // A DecayModelConstant exactly like the one you wanted already exists!
+      // A DripDecayModelConstant exactly like the one you wanted already exists!
       // Since models can be re-used, there's no need to deploy a new one.
-      console2.log("Found existing DecayModelConstant with specified configs.");
+      console2.log("Found existing DripDecayModelConstant with specified configs.");
     }
 
     console2.log(
-      "Your DecayModelConstant is available at this address:",
+      "Your DripDecayModelConstant is available at this address:",
       _availableModel
     );
   }

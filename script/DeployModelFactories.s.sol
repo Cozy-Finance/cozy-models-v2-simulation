@@ -3,8 +3,7 @@ pragma solidity 0.8.16;
 
 import "forge-std/Script.sol";
 import "src/CostModelJumpRateFactory.sol";
-import "src/DecayModelConstantFactory.sol";
-import "src/DripModelConstantFactory.sol";
+import "src/DripDecayModelConstantFactory.sol";
 
 /**
   * @notice Purpose: Local deploy, testing, and production.
@@ -42,15 +41,10 @@ contract DeployModelFactories is Script {
     address costModelFactory = address(new CostModelJumpRateFactory());
     console2.log("  CostModelJumpRateFactory deployed,", costModelFactory);
 
-    console2.log("  Deploying DecayModelConstantFactory...");
+    console2.log("  Deploying DripDecayModelConstantFactory...");
     vm.broadcast();
-    address decayModelFactory = address(new DecayModelConstantFactory());
-    console2.log("  DecayModelConstantFactory deployed,", decayModelFactory);
-
-    console2.log("  Deploying DripModelConstantFactory...");
-    vm.broadcast();
-    address dripRateFactory = address(new DripModelConstantFactory());
-    console2.log("  DripModelConstantFactory deployed,", dripRateFactory);
+    address dripDecayModelFactory = address(new DripDecayModelConstantFactory());
+    console2.log("  DripDecayModelConstantFactory deployed,", dripDecayModelFactory);
 
     console2.log("Finished deploying Cozy V2 Model Factories");
   }

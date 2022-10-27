@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: Unlicensed
 pragma solidity 0.8.16;
 
-import "src/DecayModelConstantFactory.sol";
+import "src/DripDecayModelConstantFactory.sol";
 import "src/lib/Create2.sol";
 import "forge-std/Test.sol";
 
-contract DecayModelConstantFactoryTest is Test, DecayModelConstantFactory {
+contract DecayModelConstantFactoryTest is Test, DripDecayModelConstantFactory {
 
-  DecayModelConstantFactory factory;
+  DripDecayModelConstantFactory factory;
 
   function setUp() public {
-    factory = new DecayModelConstantFactory();
+    factory = new DripDecayModelConstantFactory();
   }
 
   function test_deployModelAndVerifyAvailable() public {
@@ -25,14 +25,14 @@ contract DecayModelConstantFactoryTest is Test, DecayModelConstantFactory {
     bytes memory _decayModelConstructorArgs = abi.encode(_decayRatePerSecond);
 
     address _addr = Create2.computeCreate2Address(
-      type(DecayModelConstant).creationCode, 
+      type(DripDecayModelConstant).creationCode,
       _decayModelConstructorArgs,
       address(factory),
       keccak256("0")
     );
 
     vm.expectEmit(true, false, false, true);
-    emit DeployedDecayModelConstant(_addr, _decayRatePerSecond);
+    emit DeployedDripDecayModelConstant(_addr, _decayRatePerSecond);
     address _result = address(factory.deployModel(_decayRatePerSecond));
     assertEq(_result, factory.getModel(_decayRatePerSecond));
 
