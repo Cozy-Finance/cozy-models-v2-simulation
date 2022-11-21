@@ -9,14 +9,12 @@ contract MockCostModelJumpRate is CostModelJumpRate {
     uint256 _kink,
     uint256 _rateAtZeroUtilization,
     uint256 _rateAtKinkUtilization,
-    uint256 _rateAtFullUtilization,
-    uint256 _cancellationPenalty
+    uint256 _rateAtFullUtilization
   ) CostModelJumpRate(
     _kink,
     _rateAtZeroUtilization,
     _rateAtKinkUtilization,
-    _rateAtFullUtilization,
-    _cancellationPenalty
+    _rateAtFullUtilization
   ) {}
 
   function areaUnderCurve(
