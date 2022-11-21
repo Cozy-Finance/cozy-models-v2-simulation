@@ -41,7 +41,6 @@ contract DeployCostModelJumpRate is ScriptUtils {
 
   // Note: The attributes in this struct must be in alphabetical order due to `parseJson` limitations.
   struct CostModelMetadata {
-    uint256 cancellationPenalty; // Penalty to cancel
     uint256 costFactorAtFullUtilization; // Fee at full utilization
     uint256 costFactorAtKinkUtilization; // Fee at kink utilization
     uint256 costFactorAtZeroUtilization; // Fee at no utilization
@@ -67,14 +66,12 @@ contract DeployCostModelJumpRate is ScriptUtils {
     console2.log("    costFactorAtZeroUtilization", _metadata.costFactorAtZeroUtilization);
     console2.log("    costFactorAtKinkUtilization", _metadata.costFactorAtKinkUtilization);
     console2.log("    costFactorAtFullUtilization", _metadata.costFactorAtFullUtilization);
-    console2.log("    cancellationPenalty", _metadata.cancellationPenalty);
 
     address _availableModel = factory.getModel(
       _metadata.kink,
       _metadata.costFactorAtZeroUtilization,
       _metadata.costFactorAtKinkUtilization,
-      _metadata.costFactorAtFullUtilization,
-      _metadata.cancellationPenalty
+      _metadata.costFactorAtFullUtilization
     );
 
     if (_availableModel == address(0)) {
@@ -83,8 +80,7 @@ contract DeployCostModelJumpRate is ScriptUtils {
         _metadata.kink,
         _metadata.costFactorAtZeroUtilization,
         _metadata.costFactorAtKinkUtilization,
-        _metadata.costFactorAtFullUtilization,
-        _metadata.cancellationPenalty
+        _metadata.costFactorAtFullUtilization
       ));
       console2.log("New CostModelJumpRate deployed");
     } else {

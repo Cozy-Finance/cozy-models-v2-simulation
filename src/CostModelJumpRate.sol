@@ -49,10 +49,6 @@ contract CostModelJumpRate is ICostModel {
   /// @notice Cost factor to apply at 100% utilization, as a wad.
   uint256 public immutable costFactorAtFullUtilization;
 
-  /// @notice Penalty applied to the refund amount when canceling protection, as a wad. For example, with 10% penalty
-  /// you'd receive $90 back on a $100 refund.
-  uint256 public immutable cancellationPenalty;
-
   /// @notice Utilization percentage at which the rate of cost factor change increases, as a wad.
   uint256 public immutable kink;
 
@@ -69,25 +65,21 @@ contract CostModelJumpRate is ICostModel {
   /// @param _costFactorAtZeroUtilization The cost factor to apply at 0% utilization, as a wad.
   /// @param _costFactorAtKinkUtilization The cost factor to apply at `kink`% utilization, as a wad.
   /// @param _costFactorAtFullUtilization The cost factor to apply at 100% utilization, as a wad.
-  /// @param _cancellationPenalty The penalty applied to the refund amount when canceling protection, as a wad.
   constructor(
     uint256 _kink,
     uint256 _costFactorAtZeroUtilization,
     uint256 _costFactorAtKinkUtilization,
-    uint256 _costFactorAtFullUtilization,
-    uint256 _cancellationPenalty
+    uint256 _costFactorAtFullUtilization
   ) {
     if (_kink > FULL_UTILIZATION) revert InvalidConfiguration();
     if (_costFactorAtZeroUtilization > FixedPointMathLib.WAD) revert InvalidConfiguration();
     if (_costFactorAtKinkUtilization > FixedPointMathLib.WAD) revert InvalidConfiguration();
     if (_costFactorAtFullUtilization > FixedPointMathLib.WAD) revert InvalidConfiguration();
-    if (_cancellationPenalty > FixedPointMathLib.WAD) revert InvalidConfiguration();
 
     kink = _kink;
     costFactorAtZeroUtilization = _costFactorAtZeroUtilization;
     costFactorAtKinkUtilization = _costFactorAtKinkUtilization;
     costFactorAtFullUtilization = _costFactorAtFullUtilization;
-    cancellationPenalty = _cancellationPenalty;
   }
 
   /// @notice Returns the cost of purchasing protection as a percentage of the amount being purchased, as a wad.
@@ -117,11 +109,11 @@ contract CostModelJumpRate is ICostModel {
     if (_fromUtilization > FULL_UTILIZATION) revert InvalidUtilization();
     if (_fromUtilization == _toUtilization) return 0;
 
-    // Formula is: (1 - penalty) * (area-under-return-interval / total-area-under-utilization-to-zero).
+    // Formula is: (area-under-return-interval / total-area-under-utilization-to-zero).
     // But we do all multiplication first so that we avoid precision loss.
     uint256 _areaWithinRefundInterval = _areaUnderCurve(_toUtilization, _fromUtilization);
     uint256 _areaUnderFullUtilizationWindow = _areaUnderCurve(ZERO_UTILIZATION, _fromUtilization);
-    uint256 _numerator = (FixedPointMathLib.WAD - cancellationPenalty) * _areaWithinRefundInterval * FixedPointMathLib.WAD;
+    uint256 _numerator = _areaWithinRefundInterval * (FixedPointMathLib.WAD ** 2);
     uint256 _denominator = _areaUnderFullUtilizationWindow * FixedPointMathLib.WAD;
     return _numerator / _denominator;
   }

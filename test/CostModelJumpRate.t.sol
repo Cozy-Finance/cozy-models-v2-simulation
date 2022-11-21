@@ -12,15 +12,12 @@ contract CostModelSetup is Test {
 
   MockCostModelJumpRate costModel;
 
-  uint256 public constant CANCELLATION_PENALTY = 0.1e18;
-
   function setUp() public virtual {
     costModel = new MockCostModelJumpRate(
       0.8e18, // kink at 80% utilization
       0.0e18, // 0% fee at no utilization
       0.2e18, // 20% fee at kink utilization
-      0.5e18, // 50% fee at full utilization
-      CANCELLATION_PENALTY // charge a 10% penalty to cancel
+      0.5e18 // 50% fee at full utilization
     );
   }
 }
@@ -30,8 +27,7 @@ contract CostModelDeploy is CostModelSetup {
     uint256 _kink,
     uint256 _costFactorAtZeroUtilization,
     uint256 _costFactorAtKinkUtilization,
-    uint256 _costFactorAtFullUtilization,
-    uint256 _cancellationPenalty
+    uint256 _costFactorAtFullUtilization
   ) public {
     uint256 _oneHundredPercent = 1e18;
     vm.assume(
@@ -39,7 +35,6 @@ contract CostModelDeploy is CostModelSetup {
       || _costFactorAtZeroUtilization > _oneHundredPercent
       || _costFactorAtKinkUtilization > _oneHundredPercent
       || _costFactorAtFullUtilization > _oneHundredPercent
-      || _cancellationPenalty > _oneHundredPercent
     );
 
     vm.expectRevert(CostModelJumpRate.InvalidConfiguration.selector);
@@ -47,8 +42,7 @@ contract CostModelDeploy is CostModelSetup {
       _kink,
       _costFactorAtZeroUtilization,
       _costFactorAtKinkUtilization,
-      _costFactorAtFullUtilization,
-      _cancellationPenalty
+      _costFactorAtFullUtilization
     );
   }
 }
@@ -140,8 +134,7 @@ contract CostFactorTest is CostModelSetup {
       0.55e18, // kink at 55% utilization
       0.15e18, // 15% fee at no utilization
       0.40e18, // 40% fee at kink utilization
-      0.45e18, // 45% fee at full utilization
-      CANCELLATION_PENALTY // charge a 10% penalty to cancel
+      0.45e18 // 45% fee at full utilization
     );
 
     /// There are two different areas under this cost factor curve. They are:
@@ -206,7 +199,7 @@ contract RefundFactorTest is CostModelSetup {
   // constitutes of the area under the utilized portion of the curve.
   function test_RefundFactorOverSpecificUtilizationIntervals() public {
     // See test_AreaUnderCurveWhenIntervalIsNonZero for the source of the area calculations.
-    // Formula is: area-within-interval / total-utilized-area * (1 - penalty)
+    // Formula is: area-within-interval / total-utilized-area
     // Where:
     //   area-within-interval = B, i.e. the portion of utilization being canceled
     //   total-utilized-area = A+B
@@ -225,23 +218,23 @@ contract RefundFactorTest is CostModelSetup {
     //           Utilization %
 
     // All below kink.
-    assertApproxEqAbs(costModel.refundFactor(0.2e18, 0.0e18), 0.9e18, 1); // all of the fees, less the penalty
-    assertApproxEqAbs(costModel.refundFactor(0.5e18, 0.0e18), 0.9e18, 1); // all of the fees, less the penalty
-    assertApproxEqAbs(costModel.refundFactor(0.2e18, 0.1e18), 0.675e18, 1); // 0.00375 / 0.005 * 0.9
+    assertEq(costModel.refundFactor(0.2e18, 0.0e18), 1e18); // all of the fees
+    assertEq(costModel.refundFactor(0.5e18, 0.0e18), 1e18); // all of the fees
+    assertEq(costModel.refundFactor(0.2e18, 0.1e18), 0.75e18); // 0.00375 / 0.005
 
     // Span accross kink.
-    assertApproxEqRel(costModel.refundFactor(0.9e18, 0.5e18), 0.638372093e18, 1e10); // 0.07625 / 0.1075 * 0.9
-    assertApproxEqAbs(costModel.refundFactor(1.0e18, 0.0e18), 0.9e18, 1); // all of the fees, less the penalty
+    assertApproxEqRel(costModel.refundFactor(0.9e18, 0.5e18), 0.709302325e18, 1e10); // 0.07625 / 0.1075
+    assertEq(costModel.refundFactor(1.0e18, 0.0e18), 1e18); // all of the fees
 
     // Kink in one or more argument.
-    assertApproxEqAbs(costModel.refundFactor(1.0e18, 0.8e18), 0.42e18, 1); // 0.07 / 0.15 * 0.9
-    assertApproxEqRel(costModel.refundFactor(0.9e18, 0.8e18), 0.230232558e18, 1e10); // (0.15 - 0.0425 - 0.08) / (0.15 - 0.0425) * 0.9
-    assertApproxEqAbs(costModel.refundFactor(0.8e18, 0.4e18), 0.675e18, 1); // 0.06 / 0.08 * 0.9
-    assertApproxEqAbs(costModel.refundFactor(0.8e18, 0.2e18), 0.84375e18, 1); // 0.075 / 0.08 * 0.9
-    assertApproxEqAbs(costModel.refundFactor(0.8e18, 0.0e18), 0.9e18, 1); // all of the fees, less the penalty
+    assertApproxEqAbs(costModel.refundFactor(1.0e18, 0.8e18), 0.466666666666666666e18, 1); // 0.07 / 0.15
+    assertApproxEqRel(costModel.refundFactor(0.9e18, 0.8e18), 0.2558139535e18, 1e10); // (0.15 - 0.0425 - 0.08) / (0.15 - 0.0425)
+    assertApproxEqAbs(costModel.refundFactor(0.8e18, 0.4e18), 0.75e18, 1); // 0.06 / 0.08
+    assertApproxEqAbs(costModel.refundFactor(0.8e18, 0.2e18), 0.9375e18, 1); // 0.075 / 0.08
+    assertEq(costModel.refundFactor(0.8e18, 0.0e18), 1e18); // all of the fees
 
     // All above kink.
-    assertApproxEqAbs(costModel.refundFactor(1.0e18, 0.9e18), 0.255e18, 1); // 0.0425 / 0.15 * 0.9
+    assertApproxEqAbs(costModel.refundFactor(1.0e18, 0.9e18), 0.283333333333333333e18, 1); // 0.0425 / 0.15
   }
 
   function test_RefundFactorWhenIntervalIsZero(uint256 _utilization) public {
@@ -284,8 +277,7 @@ contract AreaUnderCurveTest is CostModelSetup {
       0.3e18, // kink at 30% utilization
       0.1e18, // 10% fee at no utilization
       0.4e18, // 40% fee at kink utilization
-      0.75e18, // 75% fee at full utilization
-      CANCELLATION_PENALTY // charge a 10% penalty to cancel
+      0.75e18 // 75% fee at full utilization
     );
 
     // Slope below kink = 0.3/0.3 = 1

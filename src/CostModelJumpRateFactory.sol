@@ -16,29 +16,26 @@ contract CostModelJumpRateFactory is BaseModelFactory {
     uint256 kink,
     uint256 costFactorAtZeroUtilization,
     uint256 costFactorAtKinkUtilization,
-    uint256 costFactorAtFullUtilization,
-    uint256 cancellationPenalty
+    uint256 costFactorAtFullUtilization
   );
 
-  /// @notice Deploys a CostModelJumpRate contract and emits a 
-  /// DeployedCostModelJumpRate event that indicates what the params from the deployment are. 
-  /// This address is then cached inside the isDeployed mapping. See CostModelJumpRate 
+  /// @notice Deploys a CostModelJumpRate contract and emits a
+  /// DeployedCostModelJumpRate event that indicates what the params from the deployment are.
+  /// This address is then cached inside the isDeployed mapping. See CostModelJumpRate
   /// constructor for more info about the input parameters.
   /// @return _model which has an address that is deterministic with the input parameters.
   function deployModel(
     uint256 _kink,
     uint256 _costFactorAtZeroUtilization,
     uint256 _costFactorAtKinkUtilization,
-    uint256 _costFactorAtFullUtilization,
-    uint256 _cancellationPenalty
+    uint256 _costFactorAtFullUtilization
   ) external returns (CostModelJumpRate _model) {
 
     _model = new CostModelJumpRate{salt: DEFAULT_SALT}(
       _kink,
       _costFactorAtZeroUtilization,
       _costFactorAtKinkUtilization,
-      _costFactorAtFullUtilization,
-      _cancellationPenalty
+      _costFactorAtFullUtilization
     );
     isDeployed[address(_model)] = true;
 
@@ -47,8 +44,7 @@ contract CostModelJumpRateFactory is BaseModelFactory {
       _kink,
       _costFactorAtZeroUtilization,
       _costFactorAtKinkUtilization,
-      _costFactorAtFullUtilization,
-      _cancellationPenalty
+      _costFactorAtFullUtilization
     );
   }
 
@@ -57,19 +53,17 @@ contract CostModelJumpRateFactory is BaseModelFactory {
     uint256 _kink,
     uint256 _costFactorAtZeroUtilization,
     uint256 _costFactorAtKinkUtilization,
-    uint256 _costFactorAtFullUtilization,
-    uint256 _cancellationPenalty
+    uint256 _costFactorAtFullUtilization
   ) external view returns (address) {
     bytes memory _costModelConstructorArgs = abi.encode(
       _kink,
       _costFactorAtZeroUtilization,
       _costFactorAtKinkUtilization,
-      _costFactorAtFullUtilization,
-      _cancellationPenalty
+      _costFactorAtFullUtilization
     );
 
     address _addr = Create2.computeCreate2Address(
-      type(CostModelJumpRate).creationCode, 
+      type(CostModelJumpRate).creationCode,
       _costModelConstructorArgs,
       address(this),
       DEFAULT_SALT
