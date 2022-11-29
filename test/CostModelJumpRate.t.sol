@@ -250,26 +250,28 @@ contract AreaUnderCurveTest is CostModelSetup {
   }
 
   function test_AreaUnderCurveWhenIntervalIsNonZero() public {
-    // The base unit is e36 b/c we're multiplying two WADs.
+    // The base unit is e54 b/c we're scaling up by three WADs.
 
     // All below kink.
-    assertEq(costModel.areaUnderCurve(0.0e18, 0.2e18), 0.005e36); // 0.5 * 0.2 * 0.2(0.25)
-    assertEq(costModel.areaUnderCurve(0.0e18, 0.5e18), 0.03125e36); // 0.5 * 0.5 * 0.5(0.25)
-    assertEq(costModel.areaUnderCurve(0.1e18, 0.2e18), 0.00375e36); // 1.5 * (0.1 * 0.1 * 0.25)
+    assertEq(costModel.areaUnderCurve(0.0e18, 0.2e18), 0.005e54); // 0.5 * 0.2 * 0.2(0.25)
+    assertEq(costModel.areaUnderCurve(0.0e18, 0.5e18), 0.03125e54); // 0.5 * 0.5 * 0.5(0.25)
+    assertEq(costModel.areaUnderCurve(0.1e18, 0.2e18), 0.00375e54); // 1.5 * (0.1 * 0.1 * 0.25)
 
     // Span accross kink.
     // (0.3 * 0.25 * 0.5) + (0.5 * 0.3 * 0.25 * 0.3) + (0.1 * 0.2) + (0.5 * 0.1 * 1.5 * 0.1)
-    assertEq(costModel.areaUnderCurve(0.5e18, 0.9e18), 0.07625e36); // Calculation above ^^
-    assertEq(costModel.areaUnderCurve(0.0e18, 1.0e18), 0.15e36); // (0.5 * 0.8 * 0.2) + (0.2 * 0.2) + (0.5 * 0.2 * 0.3)
+    assertEq(costModel.areaUnderCurve(0.5e18, 0.9e18), 0.07625e54); // Calculation above ^^
+    assertEq(costModel.areaUnderCurve(0.0e18, 1.0e18), 0.15e54); // (0.5 * 0.8 * 0.2) + (0.2 * 0.2) + (0.5 * 0.2 * 0.3)
 
     // Kink in one or more argument.
-    assertEq(costModel.areaUnderCurve(0.4e18, 0.8e18), 0.06e36); // 1.5 * (0.4 * 0.25 * 0.4)
-    assertEq(costModel.areaUnderCurve(0.8e18, 1.0e18), 0.07e36); // (0.2 * 0.2) + (0.5 * 0.2 * 1.5 * 0.2)
-    assertEq(costModel.areaUnderCurve(0.0e18, 0.8e18), 0.08e36); // 0.5 * 0.8 * 0.2
-    assertEq(costModel.areaUnderCurve(0.2e18, 0.8e18), 0.075e36); // (0.5 * 0.6 * (0.2 - 0.2 * 0.25)) + (0.6 * 0.2 * 0.25)
+    assertEq(costModel.areaUnderCurve(0.5e18, 0.8e18), 0.04875e54); // (0.3 * 0.5 * 0.25) + (0.5 * 0.3 * 0.3 * 0.25)
+    assertEq(costModel.areaUnderCurve(0.8e18, 0.9e18), 0.0275e54); // (0.2 * 0.1) + (0.5 * 0.1 * 0.1 * 1.5)
+    assertEq(costModel.areaUnderCurve(0.4e18, 0.8e18), 0.06e54); // 1.5 * (0.4 * 0.25 * 0.4)
+    assertEq(costModel.areaUnderCurve(0.8e18, 1.0e18), 0.07e54); // (0.2 * 0.2) + (0.5 * 0.2 * 1.5 * 0.2)
+    assertEq(costModel.areaUnderCurve(0.0e18, 0.8e18), 0.08e54); // 0.5 * 0.8 * 0.2
+    assertEq(costModel.areaUnderCurve(0.2e18, 0.8e18), 0.075e54); // (0.5 * 0.6 * (0.2 - 0.2 * 0.25)) + (0.6 * 0.2 * 0.25)
 
     // All above kink.
-    assertEq(costModel.areaUnderCurve(0.9e18, 1.0e18), 0.0425e36); // (0.5 * 0.1 * 1.5 * 0.1) + (0.1 * (1.5 * 0.1 + 0.2))
+    assertEq(costModel.areaUnderCurve(0.9e18, 1.0e18), 0.0425e54); // (0.5 * 0.1 * 1.5 * 0.1) + (0.1 * (1.5 * 0.1 + 0.2))
   }
 
   function test_AreaUnderCurveForNonStandardJumpRate() public {
@@ -290,26 +292,133 @@ contract AreaUnderCurveTest is CostModelSetup {
     assertEq(costModel.areaUnderCurve(0.8e18, 0.8e18), 0);
     assertEq(costModel.areaUnderCurve(1.0e18, 1.0e18), 0);
 
-    // The base unit is e36 b/c we're multiplying two WADs.
+    // The base unit is e54 b/c we're multiplying three WADs.
 
     // All below kink.
-    assertEq(costModel.areaUnderCurve(0.0e18, 0.1e18), 0.015e36); // (0.1 * 0.1) + (0.5 * 0.1 * 0.1)
-    assertEq(costModel.areaUnderCurve(0.1e18, 0.15e18), 0.01125e36); // (0.05 * (0.1 + 0.1)) + (0.5 * 0.05 * 0.05)
+    assertEq(costModel.areaUnderCurve(0.0e18, 0.1e18), 0.015e54); // (0.1 * 0.1) + (0.5 * 0.1 * 0.1)
+    assertEq(costModel.areaUnderCurve(0.1e18, 0.15e18), 0.01125e54); // (0.05 * (0.1 + 0.1)) + (0.5 * 0.05 * 0.05)
 
     // Span accross kink.
     // (0.1 * (0.1 + 0.2)) + (0.5 * 0.1 * 0.1) + (0.4 * 0.2) + (0.5 * 0.2 * 0.2 * 0.5))
-    assertEq(costModel.areaUnderCurve(0.2e18, 0.5e18), 0.125e36); // Calc above ^^.
+    assertEq(costModel.areaUnderCurve(0.2e18, 0.5e18), 0.125e54); // Calc above ^^.
     // (0.3 * 0.1) + (0.5 * 0.3 * (0.4 - 0.1)) + (0.7 * 0.4) + (0.5 * 0.7 * (0.75 - 0.4))
-    assertEq(costModel.areaUnderCurve(0.0e18, 1.0e18), 0.4775e36); // Calc above ^^.
+    assertEq(costModel.areaUnderCurve(0.0e18, 1.0e18), 0.4775e54); // Calc above ^^.
 
     // Kink in one or more argument.
-    assertEq(costModel.areaUnderCurve(0.0e18, 0.3e18), 0.075e36); // (0.1 * 0.3) + (0.5 * 0.3 * (0.4 - 0.1))
-    assertEq(costModel.areaUnderCurve(0.3e18, 1.0e18), 0.4025e36); // (0.7 * 0.4) + (0.5 * 0.7 * (0.75 - 0.4))
-    assertEq(costModel.areaUnderCurve(0.2e18, 0.3e18), 0.035e36); // (0.1 * (0.1 + 0.2)) + (0.5 * 0.1 * 0.1)
-    assertEq(costModel.areaUnderCurve(0.3e18, 0.8e18), 0.2625e36); // (0.4 * 0.5) + (0.5 * 0.5 * (0.5 * 0.5))
+    assertEq(costModel.areaUnderCurve(0.0e18, 0.3e18), 0.075e54); // (0.1 * 0.3) + (0.5 * 0.3 * (0.4 - 0.1))
+    assertEq(costModel.areaUnderCurve(0.3e18, 1.0e18), 0.4025e54); // (0.7 * 0.4) + (0.5 * 0.7 * (0.75 - 0.4))
+    assertEq(costModel.areaUnderCurve(0.2e18, 0.3e18), 0.035e54); // (0.1 * (0.1 + 0.2)) + (0.5 * 0.1 * 0.1)
+    assertEq(costModel.areaUnderCurve(0.3e18, 0.8e18), 0.2625e54); // (0.4 * 0.5) + (0.5 * 0.5 * (0.5 * 0.5))
 
     // All above kink.
-    assertEq(costModel.areaUnderCurve(0.9e18, 1.0e18), 0.0725e36); // (0.1 * (0.75 - 0.5*0.1)) + (0.5 * 0.1 * 0.1 * 0.5)
-    assertEq(costModel.areaUnderCurve(0.45e18, 0.6e18), 0.076875e36); // (0.15 * (0.4 + 0.15 * 0.5)) + (0.5 * 0.15 * 0.15 * 0.5)
+    assertEq(costModel.areaUnderCurve(0.9e18, 1.0e18), 0.0725e54); // (0.1 * (0.75 - 0.5*0.1)) + (0.5 * 0.1 * 0.1 * 0.5)
+    assertEq(costModel.areaUnderCurve(0.45e18, 0.6e18), 0.076875e54); // (0.15 * (0.4 + 0.15 * 0.5)) + (0.5 * 0.15 * 0.15 * 0.5)
+  }
+}
+
+contract RoundingTests is CostModelSetup {
+  using FixedPointMathLib for uint256;
+
+  function setUp() public virtual override {
+    costModel = new MockCostModelJumpRate(
+      0.8e18, // kink at 80% utilization
+      0.0e18, // 0% fee at no utilization
+      0.5e18, // 50% fee at kink utilization
+      1.0e18 // 100% fee at full utilization
+    );
+  }
+
+  function test_CostFactorIsNonZero() public {
+    // This is the specific interval over which we noticed the rounding issue.
+    testFuzz_CostFactorShouldBeNonZeroOverNonZeroUtilizationRanges(0, 3);
+  }
+
+  function testFuzz_CostFactorShouldBeNonZeroOverNonZeroUtilizationRanges(
+    uint256 _intervalStart,
+    uint256 _intervalEnd
+  ) public {
+    _intervalStart = bound(_intervalStart, 0, 1e18 - 1);
+    _intervalEnd = bound(_intervalEnd, _intervalStart + 1, 1e18);
+    uint256 _costFactor = costModel.costFactor(_intervalStart, _intervalEnd);
+    assertGt(_costFactor, 0);
+  }
+
+  function testFuzz_RefundFactorShouldBeLessThan100PercentOverUtilizationRanges(
+    uint256 _intervalStart,
+    uint256 _intervalEnd
+  ) public {
+    _intervalStart = bound(_intervalStart, 1, 1e18 - 1);
+    _intervalEnd = bound(_intervalEnd, _intervalStart + 1, 1e18);
+    uint256 _refundFactor = costModel.refundFactor(_intervalEnd, _intervalStart);
+    assertLt(_refundFactor, 1e18);
+  }
+
+  function testFuzz_RefundFactorShouldBe100PercentOverFullUtilizationRanges(
+    uint256 _intervalEnd
+  ) public {
+    uint256 _intervalStart = 0; // Always the full utilization window for this test.
+    _intervalEnd = bound(_intervalEnd, 1, 1e18);
+    uint256 _refundFactor = costModel.refundFactor(_intervalEnd, _intervalStart);
+    assertEq(_refundFactor, 1e18);
+  }
+
+  function test_ExtraAreaUnderCurveExamples() public {
+    assertEq(costModel.areaUnderCurve(3, 7), 12.5e18);
+    assertEq(costModel.areaUnderCurve(0, 7), 15.3125e18);
+    assertEq(
+      costModel.areaUnderCurve(
+        946164736790778453,
+        946164736790778457
+      ),
+    // low  = 946164736790778453
+    // high = 946164736790778457
+    // slope = rise/run = 0.5/0.2 = 2.5, scaled up by a wad == 2.5e18
+    // triangle = 0.5 * 4 * 4 * 2.5e18 = 20e18
+    // rectangle = length * height
+    //   length = 4
+    //   height = kinkRate * wad + (deltaKinkOnX * slope)
+    //          = 0.5e18 * 1e18 + (deltaKinkOnX * slope)
+    //          = 0.5e36 + (deltaKinkOnX * slope)
+    //          = 0.5e36 + (946164736790778453 - kink) * slope
+    //          = 0.5e36 + (946164736790778453 - 0.8e18) * 2.5e18
+    //    = 4 * (0.5e36 + (946164736790778453 - 0.8e18) * 2.5e18)
+    // Adding triangle + rectangle...
+    //   3461647367907784530000000000000000000 (rectangle)
+    //   +                20000000000000000000 (triangle)
+    //   -------------------------------------
+    //   3461647367907784550000000000000000000 (total area)
+      3461647367907784550000000000000000000
+    );
+  }
+
+  function testFuzz_RefundFactorOverMultipleRangesShouldDrainFeePool(
+    uint256 _intervalLow,
+    uint256 _intervalMidLow,
+    uint256 _intervalHigh,
+    uint256 _feePool
+  ) public {
+    // The refund factor is meant to be multiplied by the fee pool to determine
+    // amounts refunded to customers. So we want to confirm here that you can
+    // incrementally apply the refund factors to the fee pool.
+    _feePool = bound(_feePool, 1e4, 100e18); // Arbitrary but reasonable bounds.
+
+    uint256 _initFeePool = _feePool;
+    _intervalLow = bound(_intervalLow, 0, 1e18 - 3);
+    _intervalMidLow = bound(_intervalMidLow, _intervalLow + 1, 1e18 - 2);
+    uint256 _intervalMidHigh = _intervalMidLow + 1;
+    _intervalHigh = bound(_intervalHigh, _intervalMidHigh + 1, 1e18);
+    uint256 _refundFactorA = costModel.refundFactor(_intervalHigh, _intervalMidHigh);
+    _feePool -= _feePool.mulWadDown(_refundFactorA);
+    uint256 _refundFactorB = costModel.refundFactor(_intervalMidLow, _intervalLow);
+    _feePool -= _feePool.mulWadDown(_refundFactorB);
+    if (_intervalLow == 0) assertEq(_feePool, 0);
+    if (_intervalLow > 0) {
+      assertGt(_feePool, 0);
+      // In almost all cases _feePool < _initFeePool. But because we round
+      // refundFactor down (to favor the protocol) there are very small
+      // utilization intervals over which _feePool == _initFeePool even after the
+      // refundFactor is applied.
+      assertLe(_feePool, _initFeePool);
+    }
   }
 }

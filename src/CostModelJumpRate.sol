@@ -92,11 +92,17 @@ contract CostModelJumpRate is ICostModel {
     if (_toUtilization > FULL_UTILIZATION) revert InvalidUtilization();
 
     // When the utilization interval is zero, we return the instantaneous cost factor.
+    // In _pointOnCurve, we round up to favor the protocol.
     if (_fromUtilization == _toUtilization) return _pointOnCurve(_toUtilization);
 
     // Otherwise: divide the area under the curve by the interval of utilization
-    // to get the average cost factor over that interval.
-    return _areaUnderCurve(_fromUtilization, _toUtilization) / (_toUtilization - _fromUtilization);
+    // to get the average cost factor over that interval. We scale the
+    // denominator up by another wad (which makes it wad^2 based) because the
+    // numerator is going to be scaled up by wad^3 and we want the final value
+    // to just be scaled up by wad^1.
+    uint256 _denominator = (_toUtilization - _fromUtilization) * FixedPointMathLib.WAD;
+    // We want to round up to favor the protocol here, since this determines the cost of protection.
+    return _areaUnderCurve(_fromUtilization, _toUtilization).mulDivUp(1, _denominator);
   }
 
   /// @notice Gives the refund value in assets of returning protection, as a percentage of
@@ -113,12 +119,16 @@ contract CostModelJumpRate is ICostModel {
     // But we do all multiplication first so that we avoid precision loss.
     uint256 _areaWithinRefundInterval = _areaUnderCurve(_toUtilization, _fromUtilization);
     uint256 _areaUnderFullUtilizationWindow = _areaUnderCurve(ZERO_UTILIZATION, _fromUtilization);
-    uint256 _numerator = _areaWithinRefundInterval * (FixedPointMathLib.WAD ** 2);
-    uint256 _denominator = _areaUnderFullUtilizationWindow * FixedPointMathLib.WAD;
+    // Both areas are scaled up by wad^3, which cancels out during division. We
+    // scale up by an additional wad so that the percentage resulting from their
+    // division will be wad-based.
+    uint256 _numerator = _areaWithinRefundInterval * FixedPointMathLib.WAD;
+    uint256 _denominator = _areaUnderFullUtilizationWindow;
+    // We round down to favor the protocol.
     return _numerator / _denominator;
   }
 
-  /// @dev Returns the area under the curve between the `_intervalLowPoint` and `_intervalHighPoint`.
+  /// @dev Returns the area under the curve between the `_intervalLowPoint` and `_intervalHighPoint`, scaled up by wad^3.
   function _areaUnderCurve(uint256 _intervalLowPoint, uint256 _intervalHighPoint) internal view returns(uint256) {
     if (_intervalHighPoint < _intervalLowPoint) revert InvalidUtilization();
 
@@ -140,7 +150,7 @@ contract CostModelJumpRate is ICostModel {
     return _areaBeforeKink + _areaAfterKink;
   }
 
-  /// @dev Compute the area under the cost factor curve within an interval of utilization.
+  /// @dev Compute the area under the cost factor curve within an interval of utilization, scaled up by wad^3.
   ///
   /// For any interval, the shape of the area under the curve is:
   ///
@@ -182,10 +192,24 @@ contract CostModelJumpRate is ICostModel {
     uint256 _referencePointY
   ) internal pure returns(uint256) {
     if (_intervalLowPoint < _referencePointX) revert InvalidReferencePoint();
+
     uint256 length = _intervalHighPoint - _intervalLowPoint;
-    uint256 startHeight = _referencePointY + (_intervalLowPoint - _referencePointX).mulWadDown(_slope);
-    uint256 areaOfBottom = startHeight * length; // The bottom is a rectangle.
-    uint256 areaOfTop = (length * (_slope * length)) / 2e18; // The top is a triangle.
+
+    // The top is a triangle, so this is just == 0.5 * length * base.
+    //
+    // Length and slope have both been scaled up by a wad, so areaOfTop has been
+    // scaled up by wad^3 overall.
+    uint256 areaOfTop = (length * (_slope * length)) / 2;
+
+    // All of the variables in the line below have been scaled up by a wad. For
+    // this reason, multiplying `(_intervalLowPoint - _referencePointX) * _slope`
+    // produces a value that has been scaled up by wad^2, and thus can't be
+    // meaningfully be added to `_referencePointY`, which has only been scaled
+    // up by wad^1. Hence, we multiply the latter by another wad. This results
+    // in a final areaOfBottom which has been scaled up by wad^3.
+    uint256 heightOfBottom = (FixedPointMathLib.WAD * _referencePointY) + (_intervalLowPoint - _referencePointX) * _slope;
+    uint256 areaOfBottom = heightOfBottom * length; // The bottom is a rectangle.
+
     return areaOfTop + areaOfBottom;
   }
 
@@ -207,6 +231,6 @@ contract CostModelJumpRate is ICostModel {
     uint256 _offsetY = _utilization < kink ? costFactorAtZeroUtilization : costFactorAtKinkUtilization;
     uint256 _slope = _slopeAtUtilizationPoint(_utilization);
 
-    return _deltaX.mulWadDown(_slope) + _offsetY;
+    return _deltaX.mulWadUp(_slope) + _offsetY;
   }
 }
