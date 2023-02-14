@@ -209,4 +209,10 @@ contract CostModelJumpRate is ICostModel {
 
     return _deltaX.mulWadDown(_slope) + _offsetY;
   }
+
+  function shouldUpdate() external view returns (bool) {
+    return false;
+  }
+
+  function update() external {}
 }
