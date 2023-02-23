@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Unlicensed
-pragma solidity 0.8.16;
+pragma solidity 0.8.18;
 
 import "solmate/utils/FixedPointMathLib.sol";
-import "cozy-v2-interfaces/interfaces/ICostModel.sol";
+import "src/interfaces/ICostModel.sol";
 
 /**
  * @notice This instance of CostModel is meant to cover cost factor curves with the following general shape:
@@ -234,9 +234,5 @@ contract CostModelJumpRate is ICostModel {
     return _deltaX.mulWadUp(_slope) + _offsetY;
   }
 
-  function shouldUpdate() external view returns (bool) {
-    return false;
-  }
-
-  function update() external {}
+  function update(uint256 _fromUtilization, uint256 _toUtilization) external {}
 }

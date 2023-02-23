@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Unlicensed
-pragma solidity 0.8.16;
+pragma solidity 0.8.18;
 
-import "cozy-v2-interfaces/interfaces/IDripDecayModel.sol";
+import "src/interfaces/IDripDecayModel.sol";
 
 /**
  * @notice Constant rate drip/decay model.
