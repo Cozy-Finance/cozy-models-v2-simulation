@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: Unlicensed
-pragma solidity 0.8.16;
+pragma solidity 0.8.18;
 
 import "forge-std/Test.sol";
 
 import "solmate/utils/FixedPointMathLib.sol";
-import "cozy-v2-interfaces/interfaces/ICostModel.sol";
+import "src/interfaces/ICostModel.sol";
 import "test/utils/MockCostModelJumpRate.sol";
 
 contract CostModelSetup is Test {

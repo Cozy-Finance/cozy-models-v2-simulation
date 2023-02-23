@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Unlicensed
-pragma solidity 0.8.16;
+pragma solidity 0.8.18;
 
 import "src/DripDecayModelConstantFactory.sol";
 import "src/lib/Create2.sol";
