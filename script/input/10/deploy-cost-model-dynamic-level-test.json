@@ -1,0 +1,11 @@
+{
+    "factory": "",
+    "metadata": {
+        "costFactorAtFullUtilization": 1000000000000000000,
+        "costFactorAtZeroUtilization": 5000000000000000,
+        "costFactorInOptimalZone": 10000000000000000,
+        "optimalZoneRate": 500000000000,
+        "uHigh": 750000000000000000,
+        "uLow": 250000000000000000
+    }
+}
