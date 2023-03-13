@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Unlicensed
 pragma solidity 0.8.18;
 
+import {CostModelAreaCalculationsLib} from "src/lib/CostModelAreaCalculationsLib.sol";
 import "solmate/utils/FixedPointMathLib.sol";
 import "src/interfaces/ICostModel.sol";
 
@@ -37,8 +38,8 @@ import "src/interfaces/ICostModel.sol";
 contract CostModelJumpRate is ICostModel {
   using FixedPointMathLib for uint256;
 
-  uint256 constant internal ZERO_UTILIZATION = 0e18;
-  uint256 constant internal FULL_UTILIZATION = 1e18; // 1 wad
+  uint256 constant internal ZERO_UTILIZATION = 0;
+  uint256 constant internal FULL_UTILIZATION = FixedPointMathLib.WAD; // 1 wad
 
   /// @notice Cost factor to apply at 0% utilization, as a wad.
   uint256 public immutable costFactorAtZeroUtilization;
@@ -57,9 +58,6 @@ contract CostModelJumpRate is ICostModel {
 
   /// @dev Thrown when a set of cost model parameters are not within valid bounds.
   error InvalidConfiguration();
-
-  /// @dev Thrown when the parameters to `_areaUnderCurve` are invalid. See that method for more information.
-  error InvalidReferencePoint();
 
   /// @param _kink The utilization percentage at which the rate of cost factor change increases, as a wad.
   /// @param _costFactorAtZeroUtilization The cost factor to apply at 0% utilization, as a wad.
@@ -132,14 +130,14 @@ contract CostModelJumpRate is ICostModel {
   function _areaUnderCurve(uint256 _intervalLowPoint, uint256 _intervalHighPoint) internal view returns(uint256) {
     if (_intervalHighPoint < _intervalLowPoint) revert InvalidUtilization();
 
-    uint256 _areaBeforeKink = _areaUnderCurve(
+    uint256 _areaBeforeKink = CostModelAreaCalculationsLib.areaUnderCurve(
       _slopeAtUtilizationPoint(ZERO_UTILIZATION),
       (_intervalLowPoint < kink ? _intervalLowPoint : kink),
       (_intervalHighPoint < kink ? _intervalHighPoint : kink),
       ZERO_UTILIZATION,
       costFactorAtZeroUtilization
     );
-    uint256 _areaAfterKink = _areaUnderCurve(
+    uint256 _areaAfterKink = CostModelAreaCalculationsLib.areaUnderCurve(
       _slopeAtUtilizationPoint(FULL_UTILIZATION),
       (_intervalLowPoint > kink ? _intervalLowPoint : kink),
       (_intervalHighPoint > kink ? _intervalHighPoint : kink),
@@ -148,69 +146,6 @@ contract CostModelJumpRate is ICostModel {
     );
 
     return _areaBeforeKink + _areaAfterKink;
-  }
-
-  /// @dev Compute the area under the cost factor curve within an interval of utilization, scaled up by wad^3.
-  ///
-  /// For any interval, the shape of the area under the curve is:
-  ///
-  /// ```
-  ///     ^
-  ///     |
-  ///  F  |           ^
-  ///  a  |         / |
-  ///  c  |       /   |
-  ///  t  |     /     |
-  ///  o  |     |     |
-  ///  r  |     |     |
-  ///     `-----|-----|------------>
-  ///         Utilization %
-  /// ```
-  ///
-  /// i.e. a triangle on top of a rectangle:
-  ///
-  /// ```
-  ///                 ^
-  ///               / |
-  ///             /   | <-- triangle
-  ///           /_____|
-  ///           |     |
-  ///           |     | <-- rectangle
-  ///           `-----'
-  /// ```
-  ///
-  /// @param _slope Slope of the curve within the interval, expressed as a wad, i.e. 0.25e18 is a slope of 0.25.
-  /// @param _intervalLowPoint An X-coordinate on our cost factor curve; it is a wad percentage, i.e. 0.8e18 is 80%
-  /// @param _intervalHighPoint An X-coordinate on our cost factor curve; it is a wad percentage, i.e. 0.8e18 is 80%
-  /// @param _referencePointX The X-coordinate of a point through which the curve passes when it has `slope` slope and an x-value <= intervalLowPoint.
-  /// @param _referencePointY The Y-coordinate of the same point.
-  function _areaUnderCurve(
-    uint256 _slope,
-    uint256 _intervalLowPoint,
-    uint256 _intervalHighPoint,
-    uint256 _referencePointX,
-    uint256 _referencePointY
-  ) internal pure returns(uint256) {
-    if (_intervalLowPoint < _referencePointX) revert InvalidReferencePoint();
-
-    uint256 length = _intervalHighPoint - _intervalLowPoint;
-
-    // The top is a triangle, so this is just == 0.5 * length * base.
-    //
-    // Length and slope have both been scaled up by a wad, so areaOfTop has been
-    // scaled up by wad^3 overall.
-    uint256 areaOfTop = (length * (_slope * length)) / 2;
-
-    // All of the variables in the line below have been scaled up by a wad. For
-    // this reason, multiplying `(_intervalLowPoint - _referencePointX) * _slope`
-    // produces a value that has been scaled up by wad^2, and thus can't be
-    // meaningfully be added to `_referencePointY`, which has only been scaled
-    // up by wad^1. Hence, we multiply the latter by another wad. This results
-    // in a final areaOfBottom which has been scaled up by wad^3.
-    uint256 heightOfBottom = (FixedPointMathLib.WAD * _referencePointY) + (_intervalLowPoint - _referencePointX) * _slope;
-    uint256 areaOfBottom = heightOfBottom * length; // The bottom is a rectangle.
-
-    return areaOfTop + areaOfBottom;
   }
 
   /// @dev Returns slope at the specified `_utilization` as a wad.
@@ -234,5 +169,6 @@ contract CostModelJumpRate is ICostModel {
     return _deltaX.mulWadUp(_slope) + _offsetY;
   }
 
+  /// @dev The jump rate model is static, so it has no need to update storage variables.
   function update(uint256 _fromUtilization, uint256 _toUtilization) external {}
 }
