@@ -19,13 +19,13 @@ import "src/CostModelDynamicLevelFactory.sol";
  *
  * # In a separate terminal, perform a dry run the script.
  * forge script script/DeployCostModelDynamicLevel.s.sol \
- *   --sig "run(string)" "deploy-cost-model-jump-rate-<test or production>"
+ *   --sig "run(string)" "deploy-cost-model-dynamic-level-<test or production>"
  *   --rpc-url "http://127.0.0.1:8545" \
  *   -vvvv
  *
  * # Or, to broadcast a transaction.
  * forge script script/DeployCostModelDynamicLevel.s.sol \
- *   --sig "run(string)" "deploy-cost-model-jump-rate-<test or production>"
+ *   --sig "run(string)" "deploy-cost-model-dynamic-level-<test or production>"
  *   --rpc-url "http://127.0.0.1:8545" \
  *   --private-key $OWNER_PRIVATE_KEY \
  *   --broadcast \
@@ -75,34 +75,18 @@ contract DeployCostModelDynamicLevel is ScriptUtils {
         console2.log("    costFactorInOptimalZone", metadata_.costFactorInOptimalZone);
         console2.log("    optimalZoneRate", metadata_.optimalZoneRate);
 
-        address availableModel_ = factory.getModel(
-            metadata_.uLow,
-            metadata_.uHigh,
-            metadata_.costFactorAtZeroUtilization,
-            metadata_.costFactorAtFullUtilization,
-            metadata_.costFactorInOptimalZone,
-            metadata_.optimalZoneRate
+        vm.broadcast();
+        address deployedModel_ = address(
+            factory.deployModel(
+                metadata_.uLow,
+                metadata_.uHigh,
+                metadata_.costFactorAtZeroUtilization,
+                metadata_.costFactorAtFullUtilization,
+                metadata_.costFactorInOptimalZone,
+                metadata_.optimalZoneRate
+            )
         );
-
-        if (availableModel_ == address(0)) {
-            vm.broadcast();
-            availableModel_ = address(
-                factory.deployModel(
-                    metadata_.uLow,
-                    metadata_.uHigh,
-                    metadata_.costFactorAtZeroUtilization,
-                    metadata_.costFactorAtFullUtilization,
-                    metadata_.costFactorInOptimalZone,
-                    metadata_.optimalZoneRate
-                )
-            );
-            console2.log("New CostModelDynamicLevel deployed");
-        } else {
-            // A CostModelDynamicLevel exactly like the one you wanted already exists!
-            // Since models can be re-used, there's no need to deploy a new one.
-            console2.log("Found existing CostModelDynamicLevel with specified configs.");
-        }
-
-        console2.log("Your CostModelDynamicLevel is available at this address:", availableModel_);
+        console2.log("New CostModelDynamicLevel deployed");
+        console2.log("Your CostModelDynamicLevel is available at this address:", deployedModel_);
     }
 }
