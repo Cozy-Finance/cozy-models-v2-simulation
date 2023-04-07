@@ -31,10 +31,8 @@ contract CostModelDeploy is CostModelSetup {
   ) public {
     uint256 _oneHundredPercent = 1e18;
     vm.assume(
-      _kink > _oneHundredPercent
-      || _costFactorAtZeroUtilization > _oneHundredPercent
-      || _costFactorAtKinkUtilization > _oneHundredPercent
-      || _costFactorAtFullUtilization > _oneHundredPercent
+      _kink > _oneHundredPercent || _costFactorAtZeroUtilization > _oneHundredPercent
+        || _costFactorAtKinkUtilization > _oneHundredPercent || _costFactorAtFullUtilization > _oneHundredPercent
     );
 
     vm.expectRevert(CostModelJumpRate.InvalidConfiguration.selector);
@@ -48,14 +46,18 @@ contract CostModelDeploy is CostModelSetup {
 }
 
 contract CostFactorTest is CostModelSetup {
-  function testFuzz_CostFactorRevertsIfNewUtilizationIsLowerThanOld(uint256 oldUtilization, uint256 newUtilization) public {
+  function testFuzz_CostFactorRevertsIfNewUtilizationIsLowerThanOld(uint256 oldUtilization, uint256 newUtilization)
+    public
+  {
     vm.assume(newUtilization != oldUtilization);
     if (newUtilization > oldUtilization) (newUtilization, oldUtilization) = (oldUtilization, newUtilization);
     vm.expectRevert(CostModelJumpRate.InvalidUtilization.selector);
     costModel.costFactor(oldUtilization, newUtilization);
   }
 
-  function testFuzz_CostFactorRevertsIfNewUtilizationIsGreaterThan100(uint256 oldUtilization, uint256 newUtilization) public {
+  function testFuzz_CostFactorRevertsIfNewUtilizationIsGreaterThan100(uint256 oldUtilization, uint256 newUtilization)
+    public
+  {
     vm.assume(newUtilization > 1e18);
     vm.expectRevert(CostModelJumpRate.InvalidUtilization.selector);
     costModel.costFactor(oldUtilization, newUtilization);
@@ -63,18 +65,18 @@ contract CostFactorTest is CostModelSetup {
 
   function test_CostFactorOverSpecificUtilizationIntervals() public {
     // All below kink.
-    assertEq(costModel.costFactor(0.0e18, 0.2e18), 0.025e18);  // 0%-20% util ==> 2.5%
+    assertEq(costModel.costFactor(0.0e18, 0.2e18), 0.025e18); // 0%-20% util ==> 2.5%
     assertEq(costModel.costFactor(0.0e18, 0.5e18), 0.0625e18); // 0%-50% util ==> 6.25%
     assertEq(costModel.costFactor(0.1e18, 0.2e18), 0.0375e18); // 10%-20% util ==> 3.75%
 
     // Span accross kink.
     assertEq(costModel.costFactor(0.5e18, 0.9e18), 0.190625e18); // 50-90% util ==> 19.06%
-    assertEq(costModel.costFactor(0.0e18, 1.0e18), 0.15e18);     // 0-100% util ==> 15%
+    assertEq(costModel.costFactor(0.0e18, 1.0e18), 0.15e18); // 0-100% util ==> 15%
 
     // Kink in one or more argument.
-    assertEq(costModel.costFactor(0.4e18, 0.8e18), 0.15e18);  // 40-80% util ==> 15%
-    assertEq(costModel.costFactor(0.8e18, 1.0e18), 0.35e18);  // 80-100% util ==> 35%
-    assertEq(costModel.costFactor(0.0e18, 0.8e18), 0.1e18);   // 0%-80% util ==> 10%
+    assertEq(costModel.costFactor(0.4e18, 0.8e18), 0.15e18); // 40-80% util ==> 15%
+    assertEq(costModel.costFactor(0.8e18, 1.0e18), 0.35e18); // 80-100% util ==> 35%
+    assertEq(costModel.costFactor(0.0e18, 0.8e18), 0.1e18); // 0%-80% util ==> 10%
     assertEq(costModel.costFactor(0.2e18, 0.8e18), 0.125e18); // 20%-80% util ==> 12.5%
 
     // All above kink.
@@ -111,12 +113,13 @@ contract CostFactorTest is CostModelSetup {
     uint256 costFactorA = costModel.costFactor(intervalLowPoint, intervalMidPoint);
     uint256 costFactorB = costModel.costFactor(intervalMidPoint, intervalHighPoint);
 
-    uint256 feeAmountTwoIntervals = (
+    uint256 feeAmountTwoIntervals =
     //  |<----------------------- feeAmountA * 1e36 ----------------------->|
     //  |<------------ protectionAmountA * 1e18 ------------->|
-        (intervalMidPoint - intervalLowPoint) * totalProtection * costFactorA
-    //  |<----------------------- feeAmountN * 1e36 ----------------------->|
-    //  |<------------ protectionAmountB * 1e18 ------------->|
+    (
+      (intervalMidPoint - intervalLowPoint) * totalProtection * costFactorA
+      //  |<----------------------- feeAmountN * 1e36 ----------------------->|
+      //  |<------------ protectionAmountB * 1e18 ------------->|
       + (intervalHighPoint - intervalMidPoint) * totalProtection * costFactorB
     ) / 1e36;
 
@@ -178,19 +181,14 @@ contract CostFactorTest is CostModelSetup {
     ///  Total = 0.3425
     assertApproxEqRel(costModel.costFactor(0.0e18, 1.0e18), 0.3425e18, 0.00000001e18);
   }
-
 }
 
 contract RefundFactorTest is CostModelSetup {
-  function testFuzz_RefundFactorRevertsIfOldUtilizationIsLowerThanNew(uint256 oldUtilization, uint256 newUtilization) public {
+  function testFuzz_RefundFactorRevertsIfOldUtilizationIsLowerThanNew(uint256 oldUtilization, uint256 newUtilization)
+    public
+  {
     vm.assume(newUtilization != oldUtilization);
     if (newUtilization < oldUtilization) (newUtilization, oldUtilization) = (oldUtilization, newUtilization);
-    vm.expectRevert(CostModelJumpRate.InvalidUtilization.selector);
-    costModel.refundFactor(oldUtilization, newUtilization);
-  }
-
-  function testFuzz_RefundFactorRevertsIfOldUtilizationIsGreaterThan100(uint256 oldUtilization, uint256 newUtilization) public {
-    vm.assume(oldUtilization > 1e18);
     vm.expectRevert(CostModelJumpRate.InvalidUtilization.selector);
     costModel.refundFactor(oldUtilization, newUtilization);
   }
@@ -228,24 +226,32 @@ contract RefundFactorTest is CostModelSetup {
 
     // Kink in one or more argument.
     assertApproxEqAbs(costModel.refundFactor(1.0e18, 0.8e18), 0.466666666666666666e18, 1); // 0.07 / 0.15
-    assertApproxEqRel(costModel.refundFactor(0.9e18, 0.8e18), 0.2558139535e18, 1e10); // (0.15 - 0.0425 - 0.08) / (0.15 - 0.0425)
+    assertApproxEqRel(costModel.refundFactor(0.9e18, 0.8e18), 0.2558139535e18, 1e10); // (0.15 - 0.0425 - 0.08) / (0.15
+      // - 0.0425)
     assertApproxEqAbs(costModel.refundFactor(0.8e18, 0.4e18), 0.75e18, 1); // 0.06 / 0.08
     assertApproxEqAbs(costModel.refundFactor(0.8e18, 0.2e18), 0.9375e18, 1); // 0.075 / 0.08
     assertEq(costModel.refundFactor(0.8e18, 0.0e18), 1e18); // all of the fees
 
     // All above kink.
     assertApproxEqAbs(costModel.refundFactor(1.0e18, 0.9e18), 0.283333333333333333e18, 1); // 0.0425 / 0.15
+
+    // Above 100% utilization.
+    assertEq(costModel.refundFactor(1.6e18, 1.5e18), 0.184027777777777777e18);
+    assertEq(costModel.refundFactor(1.6e18, 1.2e18), 0.611111111111111111e18);
+    assertEq(costModel.refundFactor(1.6e18, 1e18), 0.791666666666666666e18);
+    assertEq(costModel.refundFactor(1.6e18, 0.8e18), 0.888888888888888888e18);
+    assertEq(costModel.refundFactor(1.6e18, 0.0e18), 1e18); // all of the fees
   }
 
   function test_RefundFactorWhenIntervalIsZero(uint256 _utilization) public {
-    _utilization = bound(_utilization, 0, 1.0e18);
+    _utilization = bound(_utilization, 0, 2.0e18);
     assertEq(costModel.refundFactor(_utilization, _utilization), 0);
   }
 }
 
 contract AreaUnderCurveTest is CostModelSetup {
   function testFuzz_AreaUnderCurveWhenIntervalIsZero(uint256 _utilization) public {
-    _utilization = bound(_utilization, 0, 1.0e18);
+    _utilization = bound(_utilization, 0, 2.0e18);
     assertEq(costModel.areaUnderCurve(_utilization, _utilization), 0);
   }
 
@@ -268,10 +274,12 @@ contract AreaUnderCurveTest is CostModelSetup {
     assertEq(costModel.areaUnderCurve(0.4e18, 0.8e18), 0.06e54); // 1.5 * (0.4 * 0.25 * 0.4)
     assertEq(costModel.areaUnderCurve(0.8e18, 1.0e18), 0.07e54); // (0.2 * 0.2) + (0.5 * 0.2 * 1.5 * 0.2)
     assertEq(costModel.areaUnderCurve(0.0e18, 0.8e18), 0.08e54); // 0.5 * 0.8 * 0.2
-    assertEq(costModel.areaUnderCurve(0.2e18, 0.8e18), 0.075e54); // (0.5 * 0.6 * (0.2 - 0.2 * 0.25)) + (0.6 * 0.2 * 0.25)
+    assertEq(costModel.areaUnderCurve(0.2e18, 0.8e18), 0.075e54); // (0.5 * 0.6 * (0.2 - 0.2 * 0.25)) + (0.6 * 0.2 *
+      // 0.25)
 
     // All above kink.
-    assertEq(costModel.areaUnderCurve(0.9e18, 1.0e18), 0.0425e54); // (0.5 * 0.1 * 1.5 * 0.1) + (0.1 * (1.5 * 0.1 + 0.2))
+    assertEq(costModel.areaUnderCurve(0.9e18, 1.0e18), 0.0425e54); // (0.5 * 0.1 * 1.5 * 0.1) + (0.1 * (1.5 * 0.1 +
+      // 0.2))
   }
 
   function test_AreaUnderCurveForNonStandardJumpRate() public {
@@ -312,7 +320,8 @@ contract AreaUnderCurveTest is CostModelSetup {
 
     // All above kink.
     assertEq(costModel.areaUnderCurve(0.9e18, 1.0e18), 0.0725e54); // (0.1 * (0.75 - 0.5*0.1)) + (0.5 * 0.1 * 0.1 * 0.5)
-    assertEq(costModel.areaUnderCurve(0.45e18, 0.6e18), 0.076875e54); // (0.15 * (0.4 + 0.15 * 0.5)) + (0.5 * 0.15 * 0.15 * 0.5)
+    assertEq(costModel.areaUnderCurve(0.45e18, 0.6e18), 0.076875e54); // (0.15 * (0.4 + 0.15 * 0.5)) + (0.5 * 0.15 *
+      // 0.15 * 0.5)
   }
 }
 
@@ -333,10 +342,9 @@ contract RoundingTests is CostModelSetup {
     testFuzz_CostFactorShouldBeNonZeroOverNonZeroUtilizationRanges(0, 3);
   }
 
-  function testFuzz_CostFactorShouldBeNonZeroOverNonZeroUtilizationRanges(
-    uint256 _intervalStart,
-    uint256 _intervalEnd
-  ) public {
+  function testFuzz_CostFactorShouldBeNonZeroOverNonZeroUtilizationRanges(uint256 _intervalStart, uint256 _intervalEnd)
+    public
+  {
     _intervalStart = bound(_intervalStart, 0, 1e18 - 1);
     _intervalEnd = bound(_intervalEnd, _intervalStart + 1, 1e18);
     uint256 _costFactor = costModel.costFactor(_intervalStart, _intervalEnd);
@@ -347,17 +355,15 @@ contract RoundingTests is CostModelSetup {
     uint256 _intervalStart,
     uint256 _intervalEnd
   ) public {
-    _intervalStart = bound(_intervalStart, 1, 1e18 - 1);
-    _intervalEnd = bound(_intervalEnd, _intervalStart + 1, 1e18);
+    _intervalStart = bound(_intervalStart, 1, 3e18 - 1);
+    _intervalEnd = bound(_intervalEnd, _intervalStart + 1, 3e18);
     uint256 _refundFactor = costModel.refundFactor(_intervalEnd, _intervalStart);
     assertLt(_refundFactor, 1e18);
   }
 
-  function testFuzz_RefundFactorShouldBe100PercentOverFullUtilizationRanges(
-    uint256 _intervalEnd
-  ) public {
+  function testFuzz_RefundFactorShouldBe100PercentOverFullUtilizationRanges(uint256 _intervalEnd) public {
     uint256 _intervalStart = 0; // Always the full utilization window for this test.
-    _intervalEnd = bound(_intervalEnd, 1, 1e18);
+    _intervalEnd = bound(_intervalEnd, 1, 5e18);
     uint256 _refundFactor = costModel.refundFactor(_intervalEnd, _intervalStart);
     assertEq(_refundFactor, 1e18);
   }
@@ -366,28 +372,25 @@ contract RoundingTests is CostModelSetup {
     assertEq(costModel.areaUnderCurve(3, 7), 12.5e18);
     assertEq(costModel.areaUnderCurve(0, 7), 15.3125e18);
     assertEq(
-      costModel.areaUnderCurve(
-        946164736790778453,
-        946164736790778457
-      ),
-    // low  = 946164736790778453
-    // high = 946164736790778457
-    // slope = rise/run = 0.5/0.2 = 2.5, scaled up by a wad == 2.5e18
-    // triangle = 0.5 * 4 * 4 * 2.5e18 = 20e18
-    // rectangle = length * height
-    //   length = 4
-    //   height = kinkRate * wad + (deltaKinkOnX * slope)
-    //          = 0.5e18 * 1e18 + (deltaKinkOnX * slope)
-    //          = 0.5e36 + (deltaKinkOnX * slope)
-    //          = 0.5e36 + (946164736790778453 - kink) * slope
-    //          = 0.5e36 + (946164736790778453 - 0.8e18) * 2.5e18
-    //    = 4 * (0.5e36 + (946164736790778453 - 0.8e18) * 2.5e18)
-    // Adding triangle + rectangle...
-    //   3461647367907784530000000000000000000 (rectangle)
-    //   +                20000000000000000000 (triangle)
-    //   -------------------------------------
-    //   3461647367907784550000000000000000000 (total area)
-      3461647367907784550000000000000000000
+      costModel.areaUnderCurve(946_164_736_790_778_453, 946_164_736_790_778_457),
+      // low  = 946164736790778453
+      // high = 946164736790778457
+      // slope = rise/run = 0.5/0.2 = 2.5, scaled up by a wad == 2.5e18
+      // triangle = 0.5 * 4 * 4 * 2.5e18 = 20e18
+      // rectangle = length * height
+      //   length = 4
+      //   height = kinkRate * wad + (deltaKinkOnX * slope)
+      //          = 0.5e18 * 1e18 + (deltaKinkOnX * slope)
+      //          = 0.5e36 + (deltaKinkOnX * slope)
+      //          = 0.5e36 + (946164736790778453 - kink) * slope
+      //          = 0.5e36 + (946164736790778453 - 0.8e18) * 2.5e18
+      //    = 4 * (0.5e36 + (946164736790778453 - 0.8e18) * 2.5e18)
+      // Adding triangle + rectangle...
+      //   3461647367907784530000000000000000000 (rectangle)
+      //   +                20000000000000000000 (triangle)
+      //   -------------------------------------
+      //   3461647367907784550000000000000000000 (total area)
+      3_461_647_367_907_784_550_000_000_000_000_000_000
     );
   }
 
@@ -403,10 +406,10 @@ contract RoundingTests is CostModelSetup {
     _feePool = bound(_feePool, 1e4, 100e18); // Arbitrary but reasonable bounds.
 
     uint256 _initFeePool = _feePool;
-    _intervalLow = bound(_intervalLow, 0, 1e18 - 3);
-    _intervalMidLow = bound(_intervalMidLow, _intervalLow + 1, 1e18 - 2);
+    _intervalLow = bound(_intervalLow, 0, 5e18 - 3);
+    _intervalMidLow = bound(_intervalMidLow, _intervalLow + 1, 5e18 - 2);
     uint256 _intervalMidHigh = _intervalMidLow + 1;
-    _intervalHigh = bound(_intervalHigh, _intervalMidHigh + 1, 1e18);
+    _intervalHigh = bound(_intervalHigh, _intervalMidHigh + 1, 5e18);
     uint256 _refundFactorA = costModel.refundFactor(_intervalHigh, _intervalMidHigh);
     _feePool -= _feePool.mulWadDown(_refundFactorA);
     uint256 _refundFactorB = costModel.refundFactor(_intervalMidLow, _intervalLow);

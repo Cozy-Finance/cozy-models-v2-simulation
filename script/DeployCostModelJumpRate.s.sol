@@ -5,32 +5,32 @@ import "script/ScriptUtils.sol";
 import "src/CostModelJumpRateFactory.sol";
 
 /**
-  * @notice Purpose: Local deploy, testing, and production.
-  *
-  * This script deploys a CostModelJumpRate contract.
-  * Before executing, the input json file `script/input/<chain-id>/deploy-cost-model-jump-rate-<test or production>.json`
-  * should be reviewed.
-  *
-  * To run this script:
-  *
-  * ```sh
-  * # Start anvil, forking from the current state of the desired chain.
-  * anvil --fork-url $OPTIMISM_RPC_URL
-  *
-  * # In a separate terminal, perform a dry run the script.
-  * forge script script/DeployCostModelJumpRate.s.sol \
-  *   --sig "run(string)" "deploy-cost-model-jump-rate-<test or production>"
-  *   --rpc-url "http://127.0.0.1:8545" \
-  *   -vvvv
-  *
-  * # Or, to broadcast a transaction.
-  * forge script script/DeployCostModelJumpRate.s.sol \
-  *   --sig "run(string)" "deploy-cost-model-jump-rate-<test or production>"
-  *   --rpc-url "http://127.0.0.1:8545" \
-  *   --private-key $OWNER_PRIVATE_KEY \
-  *   --broadcast \
-  *   -vvvv
-  * ```
+ * @notice Purpose: Local deploy, testing, and production.
+ *
+ * This script deploys a CostModelJumpRate contract.
+ * Before executing, the input json file `script/input/<chain-id>/deploy-cost-model-jump-rate-<test or production>.json`
+ * should be reviewed.
+ *
+ * To run this script:
+ *
+ * ```sh
+ * # Start anvil, forking from the current state of the desired chain.
+ * anvil --fork-url $OPTIMISM_RPC_URL
+ *
+ * # In a separate terminal, perform a dry run the script.
+ * forge script script/DeployCostModelJumpRate.s.sol \
+ *   --sig "run(string)" "deploy-cost-model-jump-rate-<test or production>"
+ *   --rpc-url "http://127.0.0.1:8545" \
+ *   -vvvv
+ *
+ * # Or, to broadcast a transaction.
+ * forge script script/DeployCostModelJumpRate.s.sol \
+ *   --sig "run(string)" "deploy-cost-model-jump-rate-<test or production>"
+ *   --rpc-url "http://127.0.0.1:8545" \
+ *   --private-key $OWNER_PRIVATE_KEY \
+ *   --broadcast \
+ *   -vvvv
+ * ```
  */
 contract DeployCostModelJumpRate is ScriptUtils {
   using stdJson for string;
@@ -76,12 +76,14 @@ contract DeployCostModelJumpRate is ScriptUtils {
 
     if (_availableModel == address(0)) {
       vm.broadcast();
-      _availableModel = address(factory.deployModel(
-        _metadata.kink,
-        _metadata.costFactorAtZeroUtilization,
-        _metadata.costFactorAtKinkUtilization,
-        _metadata.costFactorAtFullUtilization
-      ));
+      _availableModel = address(
+        factory.deployModel(
+          _metadata.kink,
+          _metadata.costFactorAtZeroUtilization,
+          _metadata.costFactorAtKinkUtilization,
+          _metadata.costFactorAtFullUtilization
+        )
+      );
       console2.log("New CostModelJumpRate deployed");
     } else {
       // A CostModelJumpRate exactly like the one you wanted already exists!
@@ -89,9 +91,6 @@ contract DeployCostModelJumpRate is ScriptUtils {
       console2.log("Found existing CostModelJumpRate with specified configs.");
     }
 
-    console2.log(
-      "Your CostModelJumpRate is available at this address:",
-      _availableModel
-    );
+    console2.log("Your CostModelJumpRate is available at this address:", _availableModel);
   }
 }

@@ -8,7 +8,8 @@ import "src/CostModelDynamicLevelFactory.sol";
  * @notice Purpose: Local deploy, testing, and production.
  *
  * This script deploys a CostModelDynamicLevel contract.
- * Before executing, the input json file `script/input/<chain-id>/deploy-cost-model-dynamic-level-<test or production>.json`
+ * Before executing, the input json file `script/input/<chain-id>/deploy-cost-model-dynamic-level-<test or
+ * production>.json`
  * should be reviewed.
  *
  * To run this script:
@@ -33,60 +34,60 @@ import "src/CostModelDynamicLevelFactory.sol";
  * ```
  */
 contract DeployCostModelDynamicLevel is ScriptUtils {
-    using stdJson for string;
+  using stdJson for string;
 
-    // -----------------------------------
-    // -------- Configured Inputs --------
-    // -----------------------------------
+  // -----------------------------------
+  // -------- Configured Inputs --------
+  // -----------------------------------
 
-    // Note: The attributes in this struct must be in alphabetical order due to `parseJson` limitations.
-    struct CostModelMetadata {
-        uint256 costFactorAtFullUtilization;
-        uint256 costFactorAtZeroUtilization;
-        uint256 costFactorInOptimalZone;
-        uint256 optimalZoneRate;
-        uint256 uHigh;
-        uint256 uLow;
-    }
+  // Note: The attributes in this struct must be in alphabetical order due to `parseJson` limitations.
+  struct CostModelMetadata {
+    uint256 costFactorAtFullUtilization;
+    uint256 costFactorAtZeroUtilization;
+    uint256 costFactorInOptimalZone;
+    uint256 optimalZoneRate;
+    uint256 uHigh;
+    uint256 uLow;
+  }
 
-    CostModelDynamicLevelFactory factory;
+  CostModelDynamicLevelFactory factory;
 
-    // ---------------------------
-    // -------- Execution --------
-    // ---------------------------
+  // ---------------------------
+  // -------- Execution --------
+  // ---------------------------
 
-    function run(string memory filename_) public {
-        string memory json_ = readInput(filename_);
+  function run(string memory filename_) public {
+    string memory json_ = readInput(filename_);
 
-        // TODO: Change to reading json after factory is deployed.
-        // factory = CostModelDynamicLevelFactory(json_.readAddress(".factory"));
-        vm.broadcast();
-        factory = new CostModelDynamicLevelFactory();
-        console2.log("  CostModelDynamicLevelFactory deployed,", address(factory));
+    // TODO: Change to reading json after factory is deployed.
+    // factory = CostModelDynamicLevelFactory(json_.readAddress(".factory"));
+    vm.broadcast();
+    factory = new CostModelDynamicLevelFactory();
+    console2.log("  CostModelDynamicLevelFactory deployed,", address(factory));
 
-        CostModelMetadata memory metadata_ = abi.decode(json_.parseRaw(".metadata"), (CostModelMetadata));
+    CostModelMetadata memory metadata_ = abi.decode(json_.parseRaw(".metadata"), (CostModelMetadata));
 
-        console2.log("Deploying CostModelDynamicLevel...");
-        console2.log("    factory", address(factory));
-        console2.log("    uLow", metadata_.uLow);
-        console2.log("    uHigh", metadata_.uHigh);
-        console2.log("    costFactorAtZeroUtilization", metadata_.costFactorAtZeroUtilization);
-        console2.log("    costFactorAtFullUtilization", metadata_.costFactorAtFullUtilization);
-        console2.log("    costFactorInOptimalZone", metadata_.costFactorInOptimalZone);
-        console2.log("    optimalZoneRate", metadata_.optimalZoneRate);
+    console2.log("Deploying CostModelDynamicLevel...");
+    console2.log("    factory", address(factory));
+    console2.log("    uLow", metadata_.uLow);
+    console2.log("    uHigh", metadata_.uHigh);
+    console2.log("    costFactorAtZeroUtilization", metadata_.costFactorAtZeroUtilization);
+    console2.log("    costFactorAtFullUtilization", metadata_.costFactorAtFullUtilization);
+    console2.log("    costFactorInOptimalZone", metadata_.costFactorInOptimalZone);
+    console2.log("    optimalZoneRate", metadata_.optimalZoneRate);
 
-        vm.broadcast();
-        address deployedModel_ = address(
-            factory.deployModel(
-                metadata_.uLow,
-                metadata_.uHigh,
-                metadata_.costFactorAtZeroUtilization,
-                metadata_.costFactorAtFullUtilization,
-                metadata_.costFactorInOptimalZone,
-                metadata_.optimalZoneRate
-            )
-        );
-        console2.log("New CostModelDynamicLevel deployed");
-        console2.log("Your CostModelDynamicLevel is available at this address:", deployedModel_);
-    }
+    vm.broadcast();
+    address deployedModel_ = address(
+      factory.deployModel(
+        metadata_.uLow,
+        metadata_.uHigh,
+        metadata_.costFactorAtZeroUtilization,
+        metadata_.costFactorAtFullUtilization,
+        metadata_.costFactorInOptimalZone,
+        metadata_.optimalZoneRate
+      )
+    );
+    console2.log("New CostModelDynamicLevel deployed");
+    console2.log("Your CostModelDynamicLevel is available at this address:", deployedModel_);
+  }
 }

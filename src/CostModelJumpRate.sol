@@ -38,8 +38,8 @@ import "src/interfaces/ICostModel.sol";
 contract CostModelJumpRate is ICostModel {
   using FixedPointMathLib for uint256;
 
-  uint256 constant internal ZERO_UTILIZATION = 0;
-  uint256 constant internal FULL_UTILIZATION = FixedPointMathLib.WAD; // 1 wad
+  uint256 internal constant ZERO_UTILIZATION = 0;
+  uint256 internal constant FULL_UTILIZATION = FixedPointMathLib.WAD; // 1 wad
 
   /// @notice Cost factor to apply at 0% utilization, as a wad.
   uint256 public immutable costFactorAtZeroUtilization;
@@ -106,11 +106,12 @@ contract CostModelJumpRate is ICostModel {
   /// @notice Gives the refund value in assets of returning protection, as a percentage of
   /// the supplier fee pool, as a wad. For example, if the supplier fee pool currently has $100
   /// and this method returns 1e17, then you will get $100 * 1e17 / 1e18 = $10 in assets back.
+  /// @dev Refund factors, unlike cost factors, are defined for utilization above 100%, since markets
+  /// can become over-utilized and protection can be sold in those cases.
   /// @param _fromUtilization Initial utilization of the market.
   /// @param _toUtilization Utilization ratio of the market after cancelling protection.
   function refundFactor(uint256 _fromUtilization, uint256 _toUtilization) external view returns (uint256) {
     if (_fromUtilization < _toUtilization) revert InvalidUtilization();
-    if (_fromUtilization > FULL_UTILIZATION) revert InvalidUtilization();
     if (_fromUtilization == _toUtilization) return 0;
 
     // Formula is: (area-under-return-interval / total-area-under-utilization-to-zero).
@@ -126,8 +127,9 @@ contract CostModelJumpRate is ICostModel {
     return _numerator / _denominator;
   }
 
-  /// @dev Returns the area under the curve between the `_intervalLowPoint` and `_intervalHighPoint`, scaled up by wad^3.
-  function _areaUnderCurve(uint256 _intervalLowPoint, uint256 _intervalHighPoint) internal view returns(uint256) {
+  /// @dev Returns the area under the curve between the `_intervalLowPoint` and `_intervalHighPoint`, scaled up by
+  /// wad^3.
+  function _areaUnderCurve(uint256 _intervalLowPoint, uint256 _intervalHighPoint) internal view returns (uint256) {
     if (_intervalHighPoint < _intervalLowPoint) revert InvalidUtilization();
 
     uint256 _areaBeforeKink = CostModelAreaCalculationsLib.areaUnderCurve(
@@ -152,15 +154,18 @@ contract CostModelJumpRate is ICostModel {
   function _slopeAtUtilizationPoint(uint256 _utilization) internal view returns (uint256) {
     // The cost factor is just the slope of the curve where x-axis=utilization and y-axis=cost.
     // slope = delta y / delta x = change in cost factor / change in utilization.
-    if (_utilization <= kink) return (costFactorAtKinkUtilization - costFactorAtZeroUtilization).divWadDown((kink - ZERO_UTILIZATION));
+    if (_utilization <= kink) {
+      return (costFactorAtKinkUtilization - costFactorAtZeroUtilization).divWadDown((kink - ZERO_UTILIZATION));
+    }
     return (costFactorAtFullUtilization - costFactorAtKinkUtilization).divWadDown(FULL_UTILIZATION - kink);
   }
 
-  /// @dev Returns the cost factor (y-coordinate) of the point where the utilization equals the given `_utilization` (x-coordinate).
+  /// @dev Returns the cost factor (y-coordinate) of the point where the utilization equals the given `_utilization`
+  /// (x-coordinate).
   function _pointOnCurve(uint256 _utilization) internal view returns (uint256) {
     if (_utilization == ZERO_UTILIZATION) return costFactorAtZeroUtilization;
     if (_utilization == FULL_UTILIZATION) return costFactorAtFullUtilization;
-    if (_utilization == kink)             return costFactorAtKinkUtilization;
+    if (_utilization == kink) return costFactorAtKinkUtilization;
 
     uint256 _deltaX = _utilization < kink ? _utilization : (_utilization - kink);
     uint256 _offsetY = _utilization < kink ? costFactorAtZeroUtilization : costFactorAtKinkUtilization;
