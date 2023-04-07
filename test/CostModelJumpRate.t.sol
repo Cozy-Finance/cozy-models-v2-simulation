@@ -239,7 +239,7 @@ contract RefundFactorTest is CostModelSetup {
   }
 
   function test_RefundFactorWhenIntervalIsZero(uint256 _utilization) public {
-    _utilization = bound(_utilization, 0, 1.0e18);
+    _utilization = bound(_utilization, 0, 2.0e18);
     assertEq(costModel.refundFactor(_utilization, _utilization), 0);
   }
 }
@@ -348,8 +348,8 @@ contract RoundingTests is CostModelSetup {
     uint256 _intervalStart,
     uint256 _intervalEnd
   ) public {
-    _intervalStart = bound(_intervalStart, 1, 1e18 - 1);
-    _intervalEnd = bound(_intervalEnd, _intervalStart + 1, 1e18);
+    _intervalStart = bound(_intervalStart, 1, 3e18 - 1);
+    _intervalEnd = bound(_intervalEnd, _intervalStart + 1, 3e18);
     uint256 _refundFactor = costModel.refundFactor(_intervalEnd, _intervalStart);
     assertLt(_refundFactor, 1e18);
   }
@@ -358,7 +358,7 @@ contract RoundingTests is CostModelSetup {
     uint256 _intervalEnd
   ) public {
     uint256 _intervalStart = 0; // Always the full utilization window for this test.
-    _intervalEnd = bound(_intervalEnd, 1, 1e18);
+    _intervalEnd = bound(_intervalEnd, 1, 5e18);
     uint256 _refundFactor = costModel.refundFactor(_intervalEnd, _intervalStart);
     assertEq(_refundFactor, 1e18);
   }
@@ -404,10 +404,10 @@ contract RoundingTests is CostModelSetup {
     _feePool = bound(_feePool, 1e4, 100e18); // Arbitrary but reasonable bounds.
 
     uint256 _initFeePool = _feePool;
-    _intervalLow = bound(_intervalLow, 0, 1e18 - 3);
-    _intervalMidLow = bound(_intervalMidLow, _intervalLow + 1, 1e18 - 2);
+    _intervalLow = bound(_intervalLow, 0, 5e18 - 3);
+    _intervalMidLow = bound(_intervalMidLow, _intervalLow + 1, 5e18 - 2);
     uint256 _intervalMidHigh = _intervalMidLow + 1;
-    _intervalHigh = bound(_intervalHigh, _intervalMidHigh + 1, 1e18);
+    _intervalHigh = bound(_intervalHigh, _intervalMidHigh + 1, 5e18);
     uint256 _refundFactorA = costModel.refundFactor(_intervalHigh, _intervalMidHigh);
     _feePool -= _feePool.mulWadDown(_refundFactorA);
     uint256 _refundFactorB = costModel.refundFactor(_intervalMidLow, _intervalLow);

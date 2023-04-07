@@ -289,7 +289,7 @@ contract RefundFactorPointInTimeTest is CostModelSetup {
     }
 
     function test_RefundFactorWhenIntervalIsZero(uint256 _utilization) public {
-        _utilization = bound(_utilization, 0, 1.0e18);
+        _utilization = bound(_utilization, 0, 2.0e18);
         assertEq(costModel.refundFactor(_utilization, _utilization), 0);
     }
 }
