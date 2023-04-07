@@ -129,19 +129,19 @@ contract CostFactorPointInTimeTest is CostModelSetup {
 contract CostFactorOverTimeTest is CostModelSetup {
     function test_CostFactorOverSpecificUtilizationIntervalDynamic() public {
         // Cost comes down over time as no one purchases.
-        assertEq(costModel.costFactor(0e18, 0.8e18), 90781250000000000);
+        assertEq(costModel.costFactor(0e18, 0.8e18), 0.9078125e17);
         skip(1);
-        assertEq(costModel.costFactor(0e18, 0.8e18), 90781040625000000);
+        assertEq(costModel.costFactor(0e18, 0.8e18), 0.90781040625e17);
         skip(1_000);
-        assertEq(costModel.costFactor(0e18, 0.8e18), 90571665625000000);
+        assertEq(costModel.costFactor(0e18, 0.8e18), 0.90571665625e17);
         skip(1_000_000_000);
-        assertEq(costModel.costFactor(0e18, 0.8e18), 11218750000000000);
+        assertEq(costModel.costFactor(0e18, 0.8e18), 0.1121875e17);
         // Cost goes up once utilization goes up.
         costModel.update(0e18, 0.8e18);
-        assertEq(costModel.costFactor(0e18, 0.8e18), 844531250000000000);
+        assertEq(costModel.costFactor(0e18, 0.8e18), 0.84453125e18);
         // Cost goes down.
         skip(1_000);
-        assertEq(costModel.costFactor(0e18, 0.8e18), 844321875000000000);
+        assertEq(costModel.costFactor(0e18, 0.8e18), 0.844321875e18);
     }
 
     function test_CostFactorInOptimalZoneConvergesToLowerBound() public {
