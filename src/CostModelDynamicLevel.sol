@@ -111,6 +111,8 @@ contract CostModelDynamicLevel is ICostModel {
     /// @notice Gives the refund value in assets of returning protection, as a percentage of
     /// the supplier fee pool, as a wad. For example, if the supplier fee pool currently has $100
     /// and this method returns 1e17, then you will get $100 * 1e17 / 1e18 = $10 in assets back.
+    /// @dev Refund factors, unlike cost factors, are defined for utilization above 100%, since markets 
+    /// can become over-utilized and protection can be sold in those cases. 
     /// @param fromUtilization_ Initial utilization of the market.
     /// @param toUtilization_ Utilization ratio of the market after cancelling protection.
     function refundFactor(uint256 fromUtilization_, uint256 toUtilization_) external view returns (uint256) {
