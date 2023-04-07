@@ -9,7 +9,6 @@ import "src/lib/Create2.sol";
  * @notice The factory for deploying a CostModelJumpRate contract.
  */
 contract CostModelJumpRateFactory is BaseModelFactory {
-
   /// @notice Event that indicates a CostModelJumpRate has been deployed.
   event DeployedCostModelJumpRate(
     address indexed costModel,
@@ -30,7 +29,6 @@ contract CostModelJumpRateFactory is BaseModelFactory {
     uint256 _costFactorAtKinkUtilization,
     uint256 _costFactorAtFullUtilization
   ) external returns (CostModelJumpRate _model) {
-
     _model = new CostModelJumpRate{salt: DEFAULT_SALT}(
       _kink,
       _costFactorAtZeroUtilization,
@@ -40,12 +38,8 @@ contract CostModelJumpRateFactory is BaseModelFactory {
     isDeployed[address(_model)] = true;
 
     emit DeployedCostModelJumpRate(
-      address(_model),
-      _kink,
-      _costFactorAtZeroUtilization,
-      _costFactorAtKinkUtilization,
-      _costFactorAtFullUtilization
-    );
+      address(_model), _kink, _costFactorAtZeroUtilization, _costFactorAtKinkUtilization, _costFactorAtFullUtilization
+      );
   }
 
   /// @return The address where the model is deployed, or address(0) if it isn't deployed.
@@ -55,18 +49,11 @@ contract CostModelJumpRateFactory is BaseModelFactory {
     uint256 _costFactorAtKinkUtilization,
     uint256 _costFactorAtFullUtilization
   ) external view returns (address) {
-    bytes memory _costModelConstructorArgs = abi.encode(
-      _kink,
-      _costFactorAtZeroUtilization,
-      _costFactorAtKinkUtilization,
-      _costFactorAtFullUtilization
-    );
+    bytes memory _costModelConstructorArgs =
+      abi.encode(_kink, _costFactorAtZeroUtilization, _costFactorAtKinkUtilization, _costFactorAtFullUtilization);
 
     address _addr = Create2.computeCreate2Address(
-      type(CostModelJumpRate).creationCode,
-      _costModelConstructorArgs,
-      address(this),
-      DEFAULT_SALT
+      type(CostModelJumpRate).creationCode, _costModelConstructorArgs, address(this), DEFAULT_SALT
     );
 
     return isDeployed[_addr] ? _addr : address(0);

@@ -7,7 +7,7 @@ import "src/interfaces/IDripDecayModel.sol";
  * @notice Constant rate drip/decay model.
  */
 contract DripDecayModelConstant is IDripDecayModel {
-  uint256 constant internal ONE_YEAR = 365.25 days;
+  uint256 internal constant ONE_YEAR = 365.25 days;
 
   /// @notice Drip or decay rate per-second.
   uint256 public immutable ratePerSecond;
@@ -31,7 +31,7 @@ contract DripDecayModelConstant is IDripDecayModel {
   ///   -r = 0.75^(1/31557600) - 1
   ///   -r = -9.116094732822280932149636651070655494101566187385032e-9
   /// Multiplying r by -1e18 to calculate the scaled up per-second value required by the constructor ~= 9116094774
-  function dripDecayRate(uint256 /* _utilization */) external view returns (uint256) {
+  function dripDecayRate(uint256 /* _utilization */ ) external view returns (uint256) {
     return ratePerSecond;
   }
 }

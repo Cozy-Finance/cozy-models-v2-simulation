@@ -6,7 +6,6 @@ import "src/lib/Create2.sol";
 import "forge-std/Test.sol";
 
 contract DecayModelConstantFactoryTest is Test, DripDecayModelConstantFactory {
-
   DripDecayModelConstantFactory factory;
 
   function setUp() public {
@@ -25,10 +24,7 @@ contract DecayModelConstantFactoryTest is Test, DripDecayModelConstantFactory {
     bytes memory _decayModelConstructorArgs = abi.encode(_decayRatePerSecond);
 
     address _addr = Create2.computeCreate2Address(
-      type(DripDecayModelConstant).creationCode,
-      _decayModelConstructorArgs,
-      address(factory),
-      keccak256("0")
+      type(DripDecayModelConstant).creationCode, _decayModelConstructorArgs, address(factory), keccak256("0")
     );
 
     vm.expectEmit(true, false, false, true);

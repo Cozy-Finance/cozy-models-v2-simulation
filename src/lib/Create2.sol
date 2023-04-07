@@ -9,7 +9,7 @@ library Create2 {
   /// @param _constructorArgs The abi encoded constructor args.
   /// @param _deployer The address of the deployer of the contract.
   /// @param _salt The salt used to compute the create2 address.
-  function computeCreate2Address(    
+  function computeCreate2Address(
     bytes memory _creationCode,
     bytes memory _constructorArgs,
     address _deployer,

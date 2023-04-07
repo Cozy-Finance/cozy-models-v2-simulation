@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 /**
  * @dev Interface that all cost models must conform to.
  */
+
 interface ICostModel {
   /// @notice Returns the cost of purchasing protection as a percentage of the amount being purchased, as a wad.
   /// For example, if you are purchasing $200 of protection and this method returns 1e17, then the cost of

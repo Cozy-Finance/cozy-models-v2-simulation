@@ -17,5 +17,3 @@ contract ScriptUtils is Script {
     return vm.readFile(_inputPath);
   }
 }
-
-

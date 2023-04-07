@@ -32,25 +32,25 @@ import "src/DripDecayModelConstantFactory.sol";
  * ```
  */
 contract DeployModelFactories is Script {
-    /// @notice Deploys all the Model Factory contracts
-    function run() public {
-        console2.log("Deploying Cozy V2 Model Factories...");
+  /// @notice Deploys all the Model Factory contracts
+  function run() public {
+    console2.log("Deploying Cozy V2 Model Factories...");
 
-        console2.log("  Deploying CostModelJumpRateFactory...");
-        vm.broadcast();
-        address costModelFactory = address(new CostModelJumpRateFactory());
-        console2.log("  CostModelJumpRateFactory deployed,", costModelFactory);
+    console2.log("  Deploying CostModelJumpRateFactory...");
+    vm.broadcast();
+    address costModelFactory = address(new CostModelJumpRateFactory());
+    console2.log("  CostModelJumpRateFactory deployed,", costModelFactory);
 
-        console2.log("  Deploying CostModelDynamicLevelFactory...");
-        vm.broadcast();
-        address costModelDynamicLevelFactory = address(new CostModelDynamicLevelFactory());
-        console2.log("  CostModelDynamicLevelFactory deployed,", costModelDynamicLevelFactory);
+    console2.log("  Deploying CostModelDynamicLevelFactory...");
+    vm.broadcast();
+    address costModelDynamicLevelFactory = address(new CostModelDynamicLevelFactory());
+    console2.log("  CostModelDynamicLevelFactory deployed,", costModelDynamicLevelFactory);
 
-        console2.log("  Deploying DripDecayModelConstantFactory...");
-        vm.broadcast();
-        address dripDecayModelFactory = address(new DripDecayModelConstantFactory());
-        console2.log("  DripDecayModelConstantFactory deployed,", dripDecayModelFactory);
+    console2.log("  Deploying DripDecayModelConstantFactory...");
+    vm.broadcast();
+    address dripDecayModelFactory = address(new DripDecayModelConstantFactory());
+    console2.log("  DripDecayModelConstantFactory deployed,", dripDecayModelFactory);
 
-        console2.log("Finished deploying Cozy V2 Model Factories");
-    }
+    console2.log("Finished deploying Cozy V2 Model Factories");
+  }
 }

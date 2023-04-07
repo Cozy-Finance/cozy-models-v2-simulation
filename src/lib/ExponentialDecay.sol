@@ -4,18 +4,18 @@ pragma solidity 0.8.18;
 import "solmate/utils/FixedPointMathLib.sol";
 
 uint256 constant MAX_INT256 = uint256(type(int256).max);
-  
-/// @dev Calculate the exponential drip/decay rate, according to   
+
+/// @dev Calculate the exponential drip/decay rate, according to
 ///   A = P * (1 - r) ^ t
 /// where:
 ///   A is final amount.
 ///   P is principal (starting) amount.
 ///   r is the per-second drip/decay rate.
 ///   t is the number of elapsed seconds.
-/// A and p should be expressed as 18 decimal numbers, e.g to calculate the 
+/// A and p should be expressed as 18 decimal numbers, e.g to calculate the
 /// @param _a 18 decimal precision uint256 expressing the final amount.
-/// @param _p 18 decimal precision uint256 expressing the principal. 
-/// @param _t uint256 expressing the time in seconds. 
+/// @param _p 18 decimal precision uint256 expressing the principal.
+/// @param _t uint256 expressing the time in seconds.
 /// @return _r 18 decimal precision uint256 expressing the decay rate in seconds.
 function calculateDripDecayRate(uint256 _a, uint256 _p, uint256 _t) pure returns (uint256 _r) {
   require(_a <= _p, "Final amount must be less than or equal to principal.");
