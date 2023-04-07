@@ -115,7 +115,6 @@ contract CostModelDynamicLevel is ICostModel {
     /// @param toUtilization_ Utilization ratio of the market after cancelling protection.
     function refundFactor(uint256 fromUtilization_, uint256 toUtilization_) external view returns (uint256) {
         if (fromUtilization_ < toUtilization_) revert InvalidUtilization();
-        if (fromUtilization_ > FULL_UTILIZATION) revert InvalidUtilization();
         if (fromUtilization_ == toUtilization_) return 0;
 
         (uint256 costFactorInOptimalZone_,) = _getUpdatedStorageParams(block.timestamp, fromUtilization_);

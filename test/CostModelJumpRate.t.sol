@@ -189,12 +189,6 @@ contract RefundFactorTest is CostModelSetup {
     costModel.refundFactor(oldUtilization, newUtilization);
   }
 
-  function testFuzz_RefundFactorRevertsIfOldUtilizationIsGreaterThan100(uint256 oldUtilization, uint256 newUtilization) public {
-    vm.assume(oldUtilization > 1e18);
-    vm.expectRevert(CostModelJumpRate.InvalidUtilization.selector);
-    costModel.refundFactor(oldUtilization, newUtilization);
-  }
-
   // The refund factor should return the percentage that the interval
   // constitutes of the area under the utilized portion of the curve.
   function test_RefundFactorOverSpecificUtilizationIntervals() public {

@@ -110,7 +110,6 @@ contract CostModelJumpRate is ICostModel {
   /// @param _toUtilization Utilization ratio of the market after cancelling protection.
   function refundFactor(uint256 _fromUtilization, uint256 _toUtilization) external view returns (uint256) {
     if (_fromUtilization < _toUtilization) revert InvalidUtilization();
-    if (_fromUtilization > FULL_UTILIZATION) revert InvalidUtilization();
     if (_fromUtilization == _toUtilization) return 0;
 
     // Formula is: (area-under-return-interval / total-area-under-utilization-to-zero).

@@ -244,15 +244,6 @@ contract RefundFactorRevertTest is CostModelSetup {
         vm.expectRevert(CostModelDynamicLevel.InvalidUtilization.selector);
         costModel.refundFactor(oldUtilization, newUtilization);
     }
-
-    function testFuzz_RefundFactorRevertsIfOldUtilizationIsGreaterThan100(
-        uint256 oldUtilization,
-        uint256 newUtilization
-    ) public {
-        vm.assume(oldUtilization > 1e18);
-        vm.expectRevert(CostModelDynamicLevel.InvalidUtilization.selector);
-        costModel.refundFactor(oldUtilization, newUtilization);
-    }
 }
 
 contract RefundFactorPointInTimeTest is CostModelSetup {
