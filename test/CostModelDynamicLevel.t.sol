@@ -46,29 +46,29 @@ contract CostFactorRevertTest is CostModelSetup {
 
 contract CostFactorPointInTimeTest is CostModelSetup {
     function test_CostFactorOverSpecificUtilizationIntervals() public {
-        assertEq(costModel.costFactor(0.0e18, 0.25e18), 52500000000000000);
-        assertEq(costModel.costFactor(0.0e18, 0.3e18), 60416666666666667);
-        assertEq(costModel.costFactor(0.1e18, 0.2e18), 62000000000000000);
-        assertEq(costModel.costFactor(0.1e18, 0.6e18), 91450000000000000);
-        assertEq(costModel.costFactor(0.0e18, 1.0e18), 200625000000000000);
-        assertEq(costModel.costFactor(0.4e18, 0.8e18), 111250000000000000);
-        assertEq(costModel.costFactor(0.75e18, 1.0e18), 550000000000000000);
-        assertEq(costModel.costFactor(0.0e18, 0.8e18), 90781250000000000);
-        assertEq(costModel.costFactor(0.2e18, 0.8e18), 106708333333333334);
-        assertEq(costModel.costFactor(0.9e18, 1.0e18), 820000000000000000);
-        assertEq(costModel.costFactor(0.9e18, 0.999e18), 818200000000000000);
+        assertEq(costModel.costFactor(0.0e18, 0.25e18), 0.525e17);
+        assertEq(costModel.costFactor(0.0e18, 0.3e18), 0.60416666666666667e17);
+        assertEq(costModel.costFactor(0.1e18, 0.2e18), 0.62e17);
+        assertEq(costModel.costFactor(0.1e18, 0.6e18), 0.9145e17);
+        assertEq(costModel.costFactor(0.0e18, 1.0e18), 0.200625e18);
+        assertEq(costModel.costFactor(0.4e18, 0.8e18), 0.11125e18);
+        assertEq(costModel.costFactor(0.75e18, 1.0e18), 0.55e18);
+        assertEq(costModel.costFactor(0.0e18, 0.8e18), 0.9078125e17);
+        assertEq(costModel.costFactor(0.2e18, 0.8e18), 0.106708333333333334e18);
+        assertEq(costModel.costFactor(0.9e18, 1.0e18), 0.82e18);
+        assertEq(costModel.costFactor(0.9e18, 0.999e18), 0.8182e18);
     }
 
     function test_CostFactorWhenIntervalIsZero() public {
-        assertEq(costModel.costFactor(0.0e18, 0.0e18), 5000000000000000);
-        assertEq(costModel.costFactor(0.8e18, 0.8e18), 280000000000000000);
-        assertEq(costModel.costFactor(1.0e18, 1.0e18), 1000000000000000000);
-        assertEq(costModel.costFactor(0.05e18, 0.05e18), 24000000000000000);
-        assertEq(costModel.costFactor(0.1e18, 0.1e18), 43000000000000000);
-        assertEq(costModel.costFactor(0.2e18, 0.2e18), 81000000000000000);
-        assertEq(costModel.costFactor(0.4e18, 0.4e18), 100000000000000000);
-        assertEq(costModel.costFactor(0.9e18, 0.9e18), 640000000000000000);
-        assertEq(costModel.costFactor(0.95e18, 0.95e18), 820000000000000000);
+        assertEq(costModel.costFactor(0.0e18, 0.0e18), 0.5e16);
+        assertEq(costModel.costFactor(0.8e18, 0.8e18), 0.28e18);
+        assertEq(costModel.costFactor(1.0e18, 1.0e18), 1e18);
+        assertEq(costModel.costFactor(0.05e18, 0.05e18), 0.24e17);
+        assertEq(costModel.costFactor(0.1e18, 0.1e18), 0.43e17);
+        assertEq(costModel.costFactor(0.2e18, 0.2e18), 0.81e17);
+        assertEq(costModel.costFactor(0.4e18, 0.4e18), 0.1e18);
+        assertEq(costModel.costFactor(0.9e18, 0.9e18), 0.64e18);
+        assertEq(costModel.costFactor(0.95e18, 0.95e18), 0.82e18);
     }
 
     function testFuzz_CostFactorOverRandomIntervals(
@@ -270,15 +270,22 @@ contract RefundFactorPointInTimeTest is CostModelSetup {
         //           Utilization %
         assertEq(costModel.refundFactor(0.2e18, 0.0e18), 1e18); // all of the fees
         assertEq(costModel.refundFactor(0.5e18, 0.0e18), 1e18); // all of the fees
-        assertEq(costModel.refundFactor(0.2e18, 0.1e18), 720930232558139534);
-        assertApproxEqRel(costModel.refundFactor(0.9e18, 0.5e18), 678609062170706006, 1e10);
+        assertEq(costModel.refundFactor(0.2e18, 0.1e18), 0.720930232558139534e18);
+        assertApproxEqRel(costModel.refundFactor(0.9e18, 0.5e18), 0.678609062170706006e18, 1e10);
         assertEq(costModel.refundFactor(1.0e18, 0.0e18), 1e18); // all of the fees
-        assertApproxEqAbs(costModel.refundFactor(1.0e18, 0.8e18), 638006230529595015, 1);
-        assertApproxEqRel(costModel.refundFactor(0.9e18, 0.8e18), 387776606954689146, 1e10);
-        assertApproxEqAbs(costModel.refundFactor(0.8e18, 0.4e18), 612736660929432013, 1);
-        assertApproxEqAbs(costModel.refundFactor(0.8e18, 0.2e18), 881583476764199655, 1);
+        assertApproxEqAbs(costModel.refundFactor(1.0e18, 0.8e18), 0.638006230529595015e18, 1);
+        assertApproxEqRel(costModel.refundFactor(0.9e18, 0.8e18), 0.387776606954689146e18, 1e10);
+        assertApproxEqAbs(costModel.refundFactor(0.8e18, 0.4e18), 0.612736660929432013e18, 1);
+        assertApproxEqAbs(costModel.refundFactor(0.8e18, 0.2e18), 0.881583476764199655e18, 1);
         assertEq(costModel.refundFactor(0.8e18, 0.0e18), 1e18);
-        assertApproxEqAbs(costModel.refundFactor(1.0e18, 0.9e18), 408722741433021806, 1);
+        assertApproxEqAbs(costModel.refundFactor(1.0e18, 0.9e18), 0.408722741433021806e18, 1);
+
+        // Above 100% utilization.
+        assertEq(costModel.refundFactor(1.6e18, 1.5e18), 0.205712313400638536e18);
+        assertEq(costModel.refundFactor(1.6e18, 1.2e18), 0.673742341875916817e18);
+        assertEq(costModel.refundFactor(1.6e18, 1e18), 0.861506601087237898e18);
+        assertEq(costModel.refundFactor(1.6e18, 0.8e18), 0.949866252480800759e18);
+        assertEq(costModel.refundFactor(1.6e18, 0.0e18), 1e18); // all of the fees
     }
 
     function test_RefundFactorWhenIntervalIsZero(uint256 _utilization) public {

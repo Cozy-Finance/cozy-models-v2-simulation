@@ -170,7 +170,7 @@ contract CostModelDynamicLevel is ICostModel {
             : CostModelAreaCalculationsLib.areaUnderCurve(
                 _slopeAtUtilizationPoint(costFactorInOptimalZone_, intervalHighPoint_),
                 (intervalLowPoint_ > uHigh ? intervalLowPoint_ : uHigh),
-                (intervalHighPoint_ < FULL_UTILIZATION ? intervalHighPoint_ : FULL_UTILIZATION),
+                intervalHighPoint_,
                 uHigh,
                 costFactorInOptimalZone_
             );

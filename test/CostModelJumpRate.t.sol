@@ -229,6 +229,13 @@ contract RefundFactorTest is CostModelSetup {
 
     // All above kink.
     assertApproxEqAbs(costModel.refundFactor(1.0e18, 0.9e18), 0.283333333333333333e18, 1); // 0.0425 / 0.15
+
+    // Above 100% utilization.
+    assertEq(costModel.refundFactor(1.6e18, 1.5e18), 0.184027777777777777e18);
+    assertEq(costModel.refundFactor(1.6e18, 1.2e18), 0.611111111111111111e18);
+    assertEq(costModel.refundFactor(1.6e18, 1e18), 0.791666666666666666e18);
+    assertEq(costModel.refundFactor(1.6e18, 0.8e18), 0.888888888888888888e18);
+    assertEq(costModel.refundFactor(1.6e18, 0.0e18), 1e18); // all of the fees
   }
 
   function test_RefundFactorWhenIntervalIsZero(uint256 _utilization) public {
@@ -239,7 +246,7 @@ contract RefundFactorTest is CostModelSetup {
 
 contract AreaUnderCurveTest is CostModelSetup {
   function testFuzz_AreaUnderCurveWhenIntervalIsZero(uint256 _utilization) public {
-    _utilization = bound(_utilization, 0, 1.0e18);
+    _utilization = bound(_utilization, 0, 2.0e18);
     assertEq(costModel.areaUnderCurve(_utilization, _utilization), 0);
   }
 
