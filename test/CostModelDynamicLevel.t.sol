@@ -11,7 +11,7 @@ contract CostModelSetup is TestBase {
   using FixedPointMathLib for uint256;
 
   MockCostModelDynamicLevel costModel;
-    address setAddress = address(0xABCDDCBA);
+  address setAddress = address(0xABCDDCBA);
 
   function setUp() public virtual {
     costModel = new MockCostModelDynamicLevel({
@@ -23,9 +23,9 @@ contract CostModelSetup is TestBase {
           optimalZoneRate_: 5e11
         });
 
-        vm.startPrank(setAddress);
-        costModel.registerSet();
-        vm.stopPrank();
+    vm.startPrank(setAddress);
+    costModel.registerSet();
+    vm.stopPrank();
   }
 }
 
@@ -150,14 +150,14 @@ contract CostFactorOverTimeTest is CostModelSetup {
     assertEq(costModel.costFactor(0e18, 0.8e18), 0.844321875e18);
   }
 
-    function test_CostFactorInOptimalZoneConvergesToLowerBound() public {
-        skip(1_000_000_000_000_000_000);
-        vm.startPrank(setAddress);
-        costModel.update(0e18, 0e18);
-        vm.stopPrank();
-        assertEq(costModel.costFactorAtZeroUtilization(), costModel.costFactorInOptimalZone());
-        assertEq(costModel.lastUpdateTime(), block.timestamp);
-    }
+  function test_CostFactorInOptimalZoneConvergesToLowerBound() public {
+    skip(1_000_000_000_000_000_000);
+    vm.startPrank(setAddress);
+    costModel.update(0e18, 0e18);
+    vm.stopPrank();
+    assertEq(costModel.costFactorAtZeroUtilization(), costModel.costFactorInOptimalZone());
+    assertEq(costModel.lastUpdateTime(), block.timestamp);
+  }
 }
 
 contract CostFactorStraightLineTest is TestBase {
@@ -335,11 +335,11 @@ contract CostModelCompareParametersTest is TestBase {
 }
 
 contract CostModelSetAuthorization is TestBase {
-    MockCostModelDynamicLevel costModel;
-    address setAddress = address(0xABCDDCBA);
+  MockCostModelDynamicLevel costModel;
+  address setAddress = address(0xABCDDCBA);
 
-    function setUp() public virtual {
-        costModel = new MockCostModelDynamicLevel({
+  function setUp() public virtual {
+    costModel = new MockCostModelDynamicLevel({
           uLow_: 0.25e18,
           uHigh_: 0.75e18,
           costFactorAtZeroUtilization_: 0.005e18,
@@ -347,49 +347,49 @@ contract CostModelSetAuthorization is TestBase {
           costFactorInOptimalZone_: 0.1e18,
           optimalZoneRate_: 5e11
         });
-    }
+  }
 
-    function test_UpdateRevertsWithNonSetAddressSender() public {
-        vm.startPrank(setAddress);
-        costModel.registerSet();
-        vm.stopPrank();
+  function test_UpdateRevertsWithNonSetAddressSender() public {
+    vm.startPrank(setAddress);
+    costModel.registerSet();
+    vm.stopPrank();
 
-        address nonSetAddress_ = _randomAddress();
-        vm.assume(nonSetAddress_ != setAddress);
+    address nonSetAddress_ = _randomAddress();
+    vm.assume(nonSetAddress_ != setAddress);
 
-        vm.startPrank(nonSetAddress_);
-        vm.expectRevert(CostModelDynamicLevel.Unauthorized.selector);
-        costModel.update(0.5e18, 0.6e18);
-        vm.stopPrank();
-    }
+    vm.startPrank(nonSetAddress_);
+    vm.expectRevert(CostModelDynamicLevel.Unauthorized.selector);
+    costModel.update(0.5e18, 0.6e18);
+    vm.stopPrank();
+  }
 
-    function test_RevertsWhenSetIsAlreadyRegistered() public {
-        vm.startPrank(setAddress);
-        costModel.registerSet();
-        vm.stopPrank();
+  function test_RevertsWhenSetIsAlreadyRegistered() public {
+    vm.startPrank(setAddress);
+    costModel.registerSet();
+    vm.stopPrank();
 
-        address nonSetAddress_ = _randomAddress();
-        vm.assume(nonSetAddress_ != setAddress);
+    address nonSetAddress_ = _randomAddress();
+    vm.assume(nonSetAddress_ != setAddress);
 
-        vm.startPrank(nonSetAddress_);
-        vm.expectRevert(CostModelDynamicLevel.SetAlreadyRegistered.selector);
-        costModel.registerSet();
-        vm.stopPrank();
-    }
+    vm.startPrank(nonSetAddress_);
+    vm.expectRevert(CostModelDynamicLevel.SetAlreadyRegistered.selector);
+    costModel.registerSet();
+    vm.stopPrank();
+  }
 
-    function test_NoRevertWhenSetRegistryMatchesSetAddress() public {
-        address setAddress_ = _randomAddress();
-        vm.startPrank(setAddress_);
-        costModel.registerSet();
-        costModel.registerSet();
-        vm.stopPrank();
-    }
+  function test_NoRevertWhenSetRegistryMatchesSetAddress() public {
+    address setAddress_ = _randomAddress();
+    vm.startPrank(setAddress_);
+    costModel.registerSet();
+    costModel.registerSet();
+    vm.stopPrank();
+  }
 
-    function test_SetAddressMatchesRegistry() public {
-        address setAddress_ = _randomAddress();
-        vm.startPrank(setAddress_);
-        costModel.registerSet();
-        vm.stopPrank();
-        assertEq(setAddress_, costModel.setAddress());
-    }
+  function test_SetAddressMatchesRegistry() public {
+    address setAddress_ = _randomAddress();
+    vm.startPrank(setAddress_);
+    costModel.registerSet();
+    vm.stopPrank();
+    assertEq(setAddress_, costModel.setAddress());
+  }
 }

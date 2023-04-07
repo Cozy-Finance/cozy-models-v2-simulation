@@ -41,8 +41,8 @@ contract CostModelDynamicLevel is ICostModel {
   /// @notice The last time the model was updated.
   uint256 public lastUpdateTime;
 
-    /// @notice The set associated with this model.
-    address public setAddress;
+  /// @notice The set associated with this model.
+  address public setAddress;
 
   /// @dev Thrown when the current time is not after `lastUpdateTime`.
   error InvalidTime();
@@ -53,11 +53,11 @@ contract CostModelDynamicLevel is ICostModel {
   /// @dev Thrown when a set of cost model parameters are not within valid bounds.
   error InvalidConfiguration();
 
-    /// @dev Thrown when the cost model's set address has already been registered.
-    error SetAlreadyRegistered();
+  /// @dev Thrown when the cost model's set address has already been registered.
+  error SetAlreadyRegistered();
 
-    /// @dev Thrown when the caller is not authorized to perform the action.
-    error Unauthorized();
+  /// @dev Thrown when the caller is not authorized to perform the action.
+  error Unauthorized();
 
   /// @dev Emitted whenever model state variables are updated.
   event UpdatedDynamicLevelModelParameters(uint256 costFactorInOptimalZone, uint256 lastUpdateTime);
@@ -267,18 +267,18 @@ contract CostModelDynamicLevel is ICostModel {
     emit UpdatedDynamicLevelModelParameters(costFactorInOptimalZone, lastUpdateTime);
   }
 
-    /// @dev Called in the protocol by the Set contract to register the Set associated with this cost model.
-    function registerSet() external {
-        address setAddress_ = setAddress;
-        if (setAddress_ != address(0) && setAddress_ != msg.sender) revert SetAlreadyRegistered();
-        setAddress = msg.sender;
-    }
+  /// @dev Called in the protocol by the Set contract to register the Set associated with this cost model.
+  function registerSet() external {
+    address setAddress_ = setAddress;
+    if (setAddress_ != address(0) && setAddress_ != msg.sender) revert SetAlreadyRegistered();
+    setAddress = msg.sender;
+  }
 
-    /// @dev Checks that msg.sender is the set address.
-    modifier onlySet() {
-        if (msg.sender != setAddress) revert Unauthorized();
-        _;
-    }
+  /// @dev Checks that msg.sender is the set address.
+  modifier onlySet() {
+    if (msg.sender != setAddress) revert Unauthorized();
+    _;
+  }
 
   function _min(uint256 a, uint256 b) public pure returns (uint256) {
     return a >= b ? b : a;
