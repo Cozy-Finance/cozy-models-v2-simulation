@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Unlicensed
 pragma solidity 0.8.18;
 
-import {CostModelAreaCalculationsLib} from "src/lib/CostModelAreaCalculationsLib.sol";
-import "solmate/utils/FixedPointMathLib.sol";
-import "src/interfaces/ICostModel.sol";
+import {CostModelAreaCalculationsLib} from "./lib/CostModelAreaCalculationsLib.sol";
+import {FixedPointMathLib} from "solmate/utils/FixedPointMathLib.sol";
+import {ICostModel} from "src/interfaces/ICostModel.sol";
 
 /**
  * @notice This instance of CostModel is an extention of the jump rate cost model with a dynamic level.
@@ -41,6 +41,9 @@ contract CostModelDynamicLevel is ICostModel {
   /// @notice The last time the model was updated.
   uint256 public lastUpdateTime;
 
+  /// @notice The set associated with this model.
+  address public setAddress;
+
   /// @dev Thrown when the current time is not after `lastUpdateTime`.
   error InvalidTime();
 
@@ -49,6 +52,12 @@ contract CostModelDynamicLevel is ICostModel {
 
   /// @dev Thrown when a set of cost model parameters are not within valid bounds.
   error InvalidConfiguration();
+
+  /// @dev Thrown when the cost model's set address has already been registered.
+  error SetAlreadyRegistered();
+
+  /// @dev Thrown when the caller is not authorized to perform the action.
+  error Unauthorized();
 
   /// @dev Emitted whenever model state variables are updated.
   event UpdatedDynamicLevelModelParameters(uint256 costFactorInOptimalZone, uint256 lastUpdateTime);
@@ -253,9 +262,22 @@ contract CostModelDynamicLevel is ICostModel {
   }
 
   /// @dev Called by the Cozy protocol to update the model's storage variables.
-  function update(uint256 utilization_, uint256 newUtilization_) external {
+  function update(uint256 utilization_, uint256 newUtilization_) external onlySet {
     (costFactorInOptimalZone, lastUpdateTime) = _getUpdatedStorageParams(block.timestamp, newUtilization_);
     emit UpdatedDynamicLevelModelParameters(costFactorInOptimalZone, lastUpdateTime);
+  }
+
+  /// @dev Called in the protocol by the Set contract to register the Set associated with this cost model.
+  function registerSet() external {
+    address setAddress_ = setAddress;
+    if (setAddress_ != address(0) && setAddress_ != msg.sender) revert SetAlreadyRegistered();
+    setAddress = msg.sender;
+  }
+
+  /// @dev Checks that msg.sender is the set address.
+  modifier onlySet() {
+    if (msg.sender != setAddress) revert Unauthorized();
+    _;
   }
 
   function _min(uint256 a, uint256 b) public pure returns (uint256) {

@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Unlicensed
 pragma solidity 0.8.18;
 
-import {CostModelAreaCalculationsLib} from "src/lib/CostModelAreaCalculationsLib.sol";
-import "solmate/utils/FixedPointMathLib.sol";
-import "src/interfaces/ICostModel.sol";
+import {CostModelAreaCalculationsLib} from "./lib/CostModelAreaCalculationsLib.sol";
+import {FixedPointMathLib} from "solmate/utils/FixedPointMathLib.sol";
+import {ICostModel} from "src/interfaces/ICostModel.sol";
 
 /**
  * @notice This instance of CostModel is meant to cover cost factor curves with the following general shape:
@@ -176,4 +176,7 @@ contract CostModelJumpRate is ICostModel {
 
   /// @dev The jump rate model is static, so it has no need to update storage variables.
   function update(uint256 _fromUtilization, uint256 _toUtilization) external {}
+
+  /// @dev The jump rate model is static, so there is no need to register the Set which can call `update`.
+  function registerSet() external {}
 }

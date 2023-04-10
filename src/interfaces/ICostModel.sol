@@ -21,4 +21,7 @@ interface ICostModel {
 
   /// @notice Updates the cost model's storage variables.
   function update(uint256 utilization, uint256 newUtilization) external;
+
+  /// @notice Called in the protocol by the Set contract to register the Set associated with this cost model.
+  function registerSet() external;
 }

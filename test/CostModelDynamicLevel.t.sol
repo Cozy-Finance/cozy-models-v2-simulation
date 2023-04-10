@@ -1,16 +1,17 @@
 // SPDX-License-Identifier: Unlicensed
 pragma solidity 0.8.18;
 
-import "forge-std/Test.sol";
+import {TestBase} from "test/utils/TestBase.sol";
 
-import "solmate/utils/FixedPointMathLib.sol";
-import "src/interfaces/ICostModel.sol";
-import "test/utils/MockCostModelDynamicLevel.sol";
+import {FixedPointMathLib} from "solmate/utils/FixedPointMathLib.sol";
+import {ICostModel} from "src/interfaces/ICostModel.sol";
+import {MockCostModelDynamicLevel, CostModelDynamicLevel} from "test/utils/MockCostModelDynamicLevel.sol";
 
-contract CostModelSetup is Test {
+contract CostModelSetup is TestBase {
   using FixedPointMathLib for uint256;
 
   MockCostModelDynamicLevel costModel;
+  address setAddress = address(0xABCDDCBA);
 
   function setUp() public virtual {
     costModel = new MockCostModelDynamicLevel({
@@ -20,8 +21,11 @@ contract CostModelSetup is Test {
           costFactorAtFullUtilization_: 1e18,
           costFactorInOptimalZone_: 0.1e18,
           optimalZoneRate_: 5e11
-        }
-    );
+        });
+
+    vm.startPrank(setAddress);
+    costModel.registerSet();
+    vm.stopPrank();
   }
 }
 
@@ -137,7 +141,9 @@ contract CostFactorOverTimeTest is CostModelSetup {
     skip(1_000_000_000);
     assertEq(costModel.costFactor(0e18, 0.8e18), 0.1121875e17);
     // Cost goes up once utilization goes up.
+    vm.startPrank(setAddress);
     costModel.update(0e18, 0.8e18);
+    vm.stopPrank();
     assertEq(costModel.costFactor(0e18, 0.8e18), 0.84453125e18);
     // Cost goes down.
     skip(1000);
@@ -146,13 +152,15 @@ contract CostFactorOverTimeTest is CostModelSetup {
 
   function test_CostFactorInOptimalZoneConvergesToLowerBound() public {
     skip(1_000_000_000_000_000_000);
+    vm.startPrank(setAddress);
     costModel.update(0e18, 0e18);
+    vm.stopPrank();
     assertEq(costModel.costFactorAtZeroUtilization(), costModel.costFactorInOptimalZone());
     assertEq(costModel.lastUpdateTime(), block.timestamp);
   }
 }
 
-contract CostFactorStraightLineTest is Test {
+contract CostFactorStraightLineTest is TestBase {
   using FixedPointMathLib for uint256;
 
   MockCostModelDynamicLevel costModel;
@@ -294,7 +302,7 @@ contract RefundFactorPointInTimeTest is CostModelSetup {
   }
 }
 
-contract CostModelCompareParametersTest is Test {
+contract CostModelCompareParametersTest is TestBase {
   using FixedPointMathLib for uint256;
 
   function testFuzz_CheaperCostModelHasLowerCosts(
@@ -323,5 +331,65 @@ contract CostModelCompareParametersTest is Test {
     assertGe(costModelExpensive.costFactor(0e18, 0.5e18), costModelCheap.costFactor(0e18, 0.5e18));
     assertGe(costModelExpensive.costFactor(0.5e18, 1e18), costModelCheap.costFactor(0.5e18, 1e18));
     assertGe(costModelExpensive.costFactor(0.2e18, 0.8e18), costModelCheap.costFactor(0.2e18, 0.8e18));
+  }
+}
+
+contract CostModelSetAuthorization is TestBase {
+  MockCostModelDynamicLevel costModel;
+  address setAddress = address(0xABCDDCBA);
+
+  function setUp() public virtual {
+    costModel = new MockCostModelDynamicLevel({
+          uLow_: 0.25e18,
+          uHigh_: 0.75e18,
+          costFactorAtZeroUtilization_: 0.005e18,
+          costFactorAtFullUtilization_: 1e18,
+          costFactorInOptimalZone_: 0.1e18,
+          optimalZoneRate_: 5e11
+        });
+  }
+
+  function test_UpdateRevertsWithNonSetAddressSender() public {
+    vm.startPrank(setAddress);
+    costModel.registerSet();
+    vm.stopPrank();
+
+    address nonSetAddress_ = _randomAddress();
+    vm.assume(nonSetAddress_ != setAddress);
+
+    vm.startPrank(nonSetAddress_);
+    vm.expectRevert(CostModelDynamicLevel.Unauthorized.selector);
+    costModel.update(0.5e18, 0.6e18);
+    vm.stopPrank();
+  }
+
+  function test_RevertsWhenSetIsAlreadyRegistered() public {
+    vm.startPrank(setAddress);
+    costModel.registerSet();
+    vm.stopPrank();
+
+    address nonSetAddress_ = _randomAddress();
+    vm.assume(nonSetAddress_ != setAddress);
+
+    vm.startPrank(nonSetAddress_);
+    vm.expectRevert(CostModelDynamicLevel.SetAlreadyRegistered.selector);
+    costModel.registerSet();
+    vm.stopPrank();
+  }
+
+  function test_NoRevertWhenSetRegistryMatchesSetAddress() public {
+    address setAddress_ = _randomAddress();
+    vm.startPrank(setAddress_);
+    costModel.registerSet();
+    costModel.registerSet();
+    vm.stopPrank();
+  }
+
+  function test_SetAddressMatchesRegistry() public {
+    address setAddress_ = _randomAddress();
+    vm.startPrank(setAddress_);
+    costModel.registerSet();
+    vm.stopPrank();
+    assertEq(setAddress_, costModel.setAddress());
   }
 }
