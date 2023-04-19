@@ -59,11 +59,7 @@ contract DeployCostModelDynamicLevel is ScriptUtils {
   function run(string memory filename_) public {
     string memory json_ = readInput(filename_);
 
-    // TODO: Change to reading json after factory is deployed.
-    // factory = CostModelDynamicLevelFactory(json_.readAddress(".factory"));
-    vm.broadcast();
-    factory = new CostModelDynamicLevelFactory();
-    console2.log("  CostModelDynamicLevelFactory deployed,", address(factory));
+    factory = CostModelDynamicLevelFactory(json_.readAddress(".factory"));
 
     CostModelMetadata memory metadata_ = abi.decode(json_.parseRaw(".metadata"), (CostModelMetadata));
 
