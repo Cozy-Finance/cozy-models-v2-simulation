@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Unlicensed
 pragma solidity 0.8.18;
 
-import "src/CostModelJumpRateFactory.sol";
-import "src/lib/Create2.sol";
+import "contracts/CostModelJumpRateFactory.sol";
+import "contracts/lib/Create2.sol";
 import "solmate/utils/FixedPointMathLib.sol";
 import "forge-std/Test.sol";
 

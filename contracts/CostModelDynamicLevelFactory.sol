@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Unlicensed
 pragma solidity 0.8.18;
 
-import "src/CostModelDynamicLevel.sol";
-import "src/abstract/BaseModelFactory.sol";
-import "src/lib/Create2.sol";
+import "./CostModelDynamicLevel.sol";
+import "./abstract/BaseModelFactory.sol";
+import "./lib/Create2.sol";
 
 /**
  * @notice The factory for deploying a CostModelDynamicLevel contract.

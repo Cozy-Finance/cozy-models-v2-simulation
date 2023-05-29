@@ -4,7 +4,7 @@ pragma solidity 0.8.18;
 import "forge-std/Test.sol";
 
 import "solmate/utils/FixedPointMathLib.sol";
-import "src/interfaces/ICostModel.sol";
+import "contracts/interfaces/ICostModel.sol";
 import "test/utils/MockCostModelJumpRate.sol";
 
 contract CostModelSetup is Test {

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import "src/lib/ExponentialDecay.sol";
+import "contracts/lib/ExponentialDecay.sol";
 import "forge-std/Test.sol";
 
 contract ExponentialDecay is Test {

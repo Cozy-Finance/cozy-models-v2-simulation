@@ -4,7 +4,7 @@ pragma solidity 0.8.18;
 import {TestBase} from "test/utils/TestBase.sol";
 
 import {FixedPointMathLib} from "solmate/utils/FixedPointMathLib.sol";
-import {ICostModel} from "src/interfaces/ICostModel.sol";
+import {ICostModel} from "contracts/interfaces/ICostModel.sol";
 import {MockCostModelDynamicLevel, CostModelDynamicLevel} from "test/utils/MockCostModelDynamicLevel.sol";
 
 contract CostModelSetup is TestBase {

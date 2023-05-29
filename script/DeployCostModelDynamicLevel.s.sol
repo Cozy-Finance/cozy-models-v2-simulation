@@ -2,7 +2,7 @@
 pragma solidity 0.8.18;
 
 import "script/ScriptUtils.sol";
-import "src/CostModelDynamicLevelFactory.sol";
+import "contracts/CostModelDynamicLevelFactory.sol";
 
 /**
  * @notice Purpose: Local deploy, testing, and production.

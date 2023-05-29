@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Unlicensed
 pragma solidity 0.8.18;
 
-import {CostModelJumpRate} from "src/CostModelJumpRate.sol";
+import {CostModelJumpRate} from "contracts/CostModelJumpRate.sol";
 
 contract MockCostModelJumpRate is CostModelJumpRate {
   constructor(

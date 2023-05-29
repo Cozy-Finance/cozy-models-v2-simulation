@@ -2,7 +2,7 @@
 pragma solidity 0.8.18;
 
 import "script/ScriptUtils.sol";
-import "src/CostModelJumpRateFactory.sol";
+import "contracts/CostModelJumpRateFactory.sol";
 
 /**
  * @notice Purpose: Local deploy, testing, and production.

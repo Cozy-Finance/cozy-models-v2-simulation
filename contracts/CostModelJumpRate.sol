@@ -3,7 +3,7 @@ pragma solidity 0.8.18;
 
 import {CostModelAreaCalculationsLib} from "./lib/CostModelAreaCalculationsLib.sol";
 import {FixedPointMathLib} from "solmate/utils/FixedPointMathLib.sol";
-import {ICostModel} from "src/interfaces/ICostModel.sol";
+import {ICostModel} from "./interfaces/ICostModel.sol";
 
 /**
  * @notice This instance of CostModel is meant to cover cost factor curves with the following general shape:

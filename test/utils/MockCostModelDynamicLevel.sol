@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Unlicensed
 pragma solidity 0.8.18;
 
-import {CostModelDynamicLevel} from "src/CostModelDynamicLevel.sol";
+import {CostModelDynamicLevel} from "contracts/CostModelDynamicLevel.sol";
 
 contract MockCostModelDynamicLevel is CostModelDynamicLevel {
   constructor(

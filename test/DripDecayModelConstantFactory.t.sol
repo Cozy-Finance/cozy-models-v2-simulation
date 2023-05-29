@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Unlicensed
 pragma solidity 0.8.18;
 
-import "src/DripDecayModelConstantFactory.sol";
-import "src/lib/Create2.sol";
+import "contracts/DripDecayModelConstantFactory.sol";
+import "contracts/lib/Create2.sol";
 import "forge-std/Test.sol";
 
 contract DecayModelConstantFactoryTest is Test, DripDecayModelConstantFactory {

@@ -2,9 +2,9 @@
 pragma solidity 0.8.18;
 
 import "forge-std/Script.sol";
-import "src/CostModelJumpRateFactory.sol";
-import "src/CostModelDynamicLevelFactory.sol";
-import "src/DripDecayModelConstantFactory.sol";
+import "contracts/CostModelJumpRateFactory.sol";
+import "contracts/CostModelDynamicLevelFactory.sol";
+import "contracts/DripDecayModelConstantFactory.sol";
 
 /**
  * @notice Purpose: Local deploy, testing, and production.

@@ -2,8 +2,8 @@
 pragma solidity 0.8.18;
 
 import "script/ScriptUtils.sol";
-import "src/DripDecayModelConstantFactory.sol";
-import {calculateDripDecayRate} from "src/lib/ExponentialDecay.sol";
+import "contracts/DripDecayModelConstantFactory.sol";
+import {calculateDripDecayRate} from "contracts/lib/ExponentialDecay.sol";
 
 /**
  * @notice Purpose: Local deploy, testing, and production.
