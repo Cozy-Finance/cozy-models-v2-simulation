@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Unlicensed
 pragma solidity 0.8.18;
 
-import {CostModelAreaCalculationsLib} from "./lib/CostModelAreaCalculationsLib.sol";
+import {CostModelAreaCalculationsLib} from "contracts/lib/CostModelAreaCalculationsLib.sol";
 import {FixedPointMathLib} from "solmate/utils/FixedPointMathLib.sol";
-import {ICostModel} from "./interfaces/ICostModel.sol";
+import {ICostModel} from "contracts/interfaces/ICostModel.sol";
 
 /**
  * @notice This instance of CostModel is an extention of the jump rate cost model with a dynamic level.

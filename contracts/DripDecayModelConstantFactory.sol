@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Unlicensed
 pragma solidity 0.8.18;
 
-import "./DripDecayModelConstant.sol";
-import "./abstract/BaseModelFactory.sol";
-import "./lib/Create2.sol";
+import "contracts/DripDecayModelConstant.sol";
+import "contracts/abstract/BaseModelFactory.sol";
+import "contracts/lib/Create2.sol";
 
 /**
  * @notice The factory for deploying a DripDecayModelConstant contract.

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Unlicensed
 pragma solidity 0.8.18;
 
-import "./interfaces/IDripDecayModel.sol";
+import "contracts/interfaces/IDripDecayModel.sol";
 
 /**
  * @notice Constant rate drip/decay model.
