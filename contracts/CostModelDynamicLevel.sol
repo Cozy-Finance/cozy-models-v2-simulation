@@ -100,7 +100,7 @@ contract CostModelDynamicLevel is ICostModel {
     if (toUtilization_ < fromUtilization_) revert InvalidUtilization();
     if (toUtilization_ > FULL_UTILIZATION) revert InvalidUtilization();
 
-    (uint256 costFactorInOptimalZone_,) = _getUpdatedStorageParams(block.timestamp, fromUtilization_);
+    (uint256 costFactorInOptimalZone_,) = getUpdatedStorageParams(block.timestamp, fromUtilization_);
 
     if (fromUtilization_ == toUtilization_) {
       return _pointOnCurve(costFactorInOptimalZone_, toUtilization_);
@@ -128,7 +128,7 @@ contract CostModelDynamicLevel is ICostModel {
     if (fromUtilization_ < toUtilization_) revert InvalidUtilization();
     if (fromUtilization_ == toUtilization_) return 0;
 
-    (uint256 costFactorInOptimalZone_,) = _getUpdatedStorageParams(block.timestamp, fromUtilization_);
+    (uint256 costFactorInOptimalZone_,) = getUpdatedStorageParams(block.timestamp, fromUtilization_);
 
     // Formula is: (area-under-return-interval / total-area-under-utilization-to-zero).
     // But we do all multiplication first so that we avoid precision loss.
@@ -250,8 +250,8 @@ contract CostModelDynamicLevel is ICostModel {
   /// `lastUpdateTime`.
   /// @param currentTime_ Current timestamp.
   /// @param utilization_ Current utilization.
-  function _getUpdatedStorageParams(uint256 currentTime_, uint256 utilization_)
-    internal
+  function getUpdatedStorageParams(uint256 currentTime_, uint256 utilization_)
+    public
     view
     returns (uint256 newCostFactorInOptimalZone_, uint256 newLastUpdateTime_)
   {
@@ -263,7 +263,7 @@ contract CostModelDynamicLevel is ICostModel {
 
   /// @dev Called by the Cozy protocol to update the model's storage variables.
   function update(uint256 utilization_, uint256 newUtilization_) external onlySet {
-    (costFactorInOptimalZone, lastUpdateTime) = _getUpdatedStorageParams(block.timestamp, newUtilization_);
+    (costFactorInOptimalZone, lastUpdateTime) = getUpdatedStorageParams(block.timestamp, newUtilization_);
     emit UpdatedDynamicLevelModelParameters(costFactorInOptimalZone, lastUpdateTime);
   }
 

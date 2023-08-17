@@ -29,8 +29,4 @@ contract MockCostModelDynamicLevel is CostModelDynamicLevel {
   {
     return _areaUnderCurve(intervalLowPoint_, intervalHighPoint_, costFactorInOptimalZone_);
   }
-
-  function getUpdatedStorageParams(uint256 currentTime_, uint256 utilization_) public view returns (uint256, uint256) {
-    return _getUpdatedStorageParams(currentTime_, utilization_);
-  }
 }
